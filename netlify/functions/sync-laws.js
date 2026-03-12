@@ -56,17 +56,42 @@ export default async (req, context) => {
         const updatedLaws = [];
         const API_KEY = process.env.LAW_API_KEY || "bck";
 
-        for (const item of LAW_LIST) {
-            if (!item.name || !item.api) continue;
-            const fetchUrl = item.api.replace('${API_KEY}', API_KEY);
+        // 기존의 1개씩 처리하는 for문을 삭제하고, 10개씩 병렬로 처리하도록 변경합니다.
+        const chunkSize = 10; 
+        for (let i = 0; i < LAW_LIST.length; i += chunkSize) {
+            const chunk = LAW_LIST.slice(i, i + chunkSize);
+            
+            // 10개의 API 요청을 동시에 생성
+            const promises = chunk.map(async (item) => {
+                if (!item.name || !item.api) return null;
+                const fetchUrl = item.api.replace('${API_KEY}', API_KEY);
 
-            try {
-                const response = await fetch(fetchUrl);
-// ... existing code ...
-                console.log(`[성공] ${item.name}`);
-            } catch (err) {
-                console.error(`[에러] ${item.name}: ${err.message}`);
-            }
+                try {
+                    const response = await fetch(fetchUrl);
+                    if (!response.ok) throw new Error(`${item.name} 응답 에러`);
+                    const data = await response.json();
+                    
+                    const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data;
+                    console.log(`[성공] ${item.name}`);
+                    
+                    // 성공 시 데이터 객체 반환
+                    return {
+                        id: basicInfo?.법령ID || basicInfo?.engLawId || `law_${item.no}`,
+                        title: item.name,
+                        raw_data: data,
+                        lastUpdated: basicInfo?.시행일자 || basicInfo?.enfDt || new Date().toISOString()
+                    };
+                } catch (err) {
+                    console.error(`[에러] ${item.name}: ${err.message}`);
+                    return null; // 실패 시 null 반환하여 다른 요청에 영향을 주지 않음
+                }
+            });
+
+            // 10개의 요청이 모두 완료될 때까지 기다림 (약 1~2초 소요)
+            const results = await Promise.all(promises);
+            
+            // 배열에서 실패한 항목(null)을 제거하고 updatedLaws 배열에 병합
+            updatedLaws.push(...results.filter(law => law !== null));
         }
 
         const version = new Date().toISOString();
