@@ -20,7 +20,8 @@ export default async (req, context) => {
 
         // 1. 버전 확인 (/api/check-update 로 호출될 때)
         if (path.includes('/check-update')) {
-            const meta = await store.getJSON('metadata');
+            // [수정됨] getJSON 대신 get 함수에 type 옵션을 주어 호출해야 합니다.
+            const meta = await store.get('metadata', { type: 'json' });
             return new Response(JSON.stringify({ latestVersion: meta?.latestVersion || null }), {
                 status: 200,
                 headers
@@ -29,8 +30,9 @@ export default async (req, context) => {
 
         // 2. 전체 데이터 가져오기 (/api/get-all-laws 로 호출될 때)
         if (path.includes('/get-all-laws')) {
-            const meta = await store.getJSON('metadata');
-            const data = await store.getJSON('laws_data');
+            // [수정됨] getJSON 대신 get 함수에 type 옵션을 주어 호출해야 합니다.
+            const meta = await store.get('metadata', { type: 'json' });
+            const data = await store.get('laws_data', { type: 'json' });
             return new Response(JSON.stringify({
                 version: meta?.latestVersion || null,
                 data: data || []
