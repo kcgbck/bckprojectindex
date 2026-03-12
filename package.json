@@ -1,0 +1,10 @@
+{
+  "name": "coast-guard-law-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "해경 법령집 Netlify 자동 업데이트 서버",
+  "dependencies": {
+    "@netlify/functions": "^2.6.0",
+    "@netlify/blobs": "^7.3.0"
+  }
+}
