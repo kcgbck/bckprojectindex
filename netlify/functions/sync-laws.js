@@ -47,6 +47,36 @@ const LAW_LIST = [
     { no: 44, name: "해양환경관리법", api: "https://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=010379&type=JSON" },
     { no: 45, name: "해양환경관리법 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=010636&type=JSON" },
     { no: 46, name: "해양환경관리법 시행령", api: "https://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=010632&type=JSON" }
+    { no: 47, name: "수상에서의 수색ㆍ구조 등에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=977&type=JSON" }
+    { no: 48, name: "수상에서의 수색ㆍ구조 등에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=3997&type=JSON" }
+    { no: 49, name: "수상에서의 수색ㆍ구조 등에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=7528&type=JSON&type=JSON" }
+    { no: 50, name: "수상레저기구의 등록 및 검사에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=14294&type=JSON&type=JSON" }
+    { no: 51, name: "수상레저기구의 등록 및 검사에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=14451&type=JSON&type=JSON" }
+    { no: 52, name: "수상레저기구의 등록 및 검사에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=14470&type=JSON&type=JSON&type=JSON" }
+    { no: 53, name: "내수면 수상레저활동 안전관리 지원 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000225134&type=JSON&type=JSON" }
+    { no: 54, name: "동력수상레저기구 안전검사 기준", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000225688&type=JSON&type=JSON" }
+    { no: 55, name: "서귀포해양경찰서 수상레저활동 금지구역 지정 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000231428&type=JSON&type=JSON" }
+    { no: 56, name: "수상레저기구의 종류에 관한 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000249996&type=JSON&type=JSON" }
+    { no: 57, name: "수상레저안전업무 처리규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000249826&type=JSON&type=JSON" }
+    { no: 58, name: "전기추진 동력수상레저기구 설비기준", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000237242&type=JSON&type=JSON" }
+    { no: 59, name: "(제주해양경찰서) 수상레저활동 금지구역 지정 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000230212&type=JSON&type=JSON" }
+    { no: 60, name: "해양사고의 조사 및 심판에 관한 법률의 적용대상이 아닌 수상레저기구", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000262268&type=JSON&type=JSON" }
+    { no: 61, name: "수중레저 안전관리규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000261918&type=JSON" }
+    { no: 62, name: "수중레저활동 금지구역 지정 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000186526&type=JSON&type=JSON" }
+    { no: 63, name: "수중형 체험활동 안전관리요원 자격 인정단체 지정에 관한 지침", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000275576&type=JSON&type=JSON" }
+    { no: 64, name: "불법 외국선박 나포 포상금 지급에 관한 규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000246764&type=JSON&type=JSON" }
+    { no: 65, name: "불법조업 외국어선 사법처리 절차 등에 관한 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000181898&type=JSON&type=JSON" }
+    { no: 66, name: "서귀포해양경찰서 수상레저활동 금지구역 지정 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000231428&type=JSON&type=JSON" }
+    { no: 67, name: "(서귀포해양경찰서) 해양레저활동 허가필요수역 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000224910&type=JSON&type=JSON" }
+    { no: 68, name: "선박패스(V-Pass) 장치 등의 설치기준 및 운영 등에 관한 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000264514&type=JSON&type=JSON" }
+    { no: 69, name: "수상레저기구의 종류에 관한 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000249996&type=JSON&type=JSON" }
+    { no: 70, name: "수상레저사업장 종사 래프팅가이드 자격관리 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000272918&type=JSON&type=JSON" }
+    { no: 71, name: "수상레저안전업무 처리규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000249826&type=JSON&type=JSON" }
+    { no: 72, name: "수색구조수당 지급 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000188479&type=JSON&type=JSON" }
+    { no: 73, name: "어선 출입항신고 관리 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000192325&type=JSON&type=JSON" }
+    { no: 74, name: "연안사고 안전관리규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000251878&type=JSON&type=JSON" }
+    { no: 75, name: "연안안전지킴이 운영규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000275534&type=JSON&type=JSON" }
+    { no: 76, name: "연안체험활동 안전교육 운영에 관한 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2100000215085&type=JSON&type=JSON" }
 ];
 
 export default async (req, context) => {
