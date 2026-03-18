@@ -71,6 +71,12 @@ const LAW_LIST = [
     { no: 67, name: "연안사고 안전관리규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000251878&type=JSON" },
     { no: 68, name: "연안안전지킴이 운영규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000275534&type=JSON" },
     { no: 69, name: "연안체험활동 안전교육 운영에 관한 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000215085&type=JSON" },
+    { no: 70, name: "어선법", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=001483&type=JSON" },
+    { no: 71, name: "어선법 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=004157&type=JSON" },
+    { no: 72, name: "어선법 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=007684&type=JSON" },
+    { no: 73, name: "공유수면 관리 및 매립에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=011186&type=JSON" },
+    { no: 74, name: "공유수면 관리 및 매립에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=011293&type=JSON" },
+    { no: 75, name: "공유수면 관리 및 매립에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=011295&type=JSON" },
 ];
 
 export default async (req, context) => {
