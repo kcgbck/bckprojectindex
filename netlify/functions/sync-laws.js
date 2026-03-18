@@ -66,12 +66,11 @@ const LAW_LIST = [
     { no: 62, name: "불법조업 외국어선 사법처리 절차 등에 관한 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000181898&type=JSON" },
     { no: 63, name: "선박패스(V-Pass) 장치 등의 설치기준 및 운영 등에 관한 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000264514&type=JSON" },
     { no: 64, name: "수상레저사업장 종사 래프팅가이드 자격관리 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000272918&type=JSON" },
-    { no: 65, name: "수상레저안전업무 처리규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000249826&type=JSON" },
-    { no: 66, name: "수색구조수당 지급 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000188479&type=JSON" },
-    { no: 67, name: "어선 출입항신고 관리 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000192325&type=JSON" },
-    { no: 68, name: "연안사고 안전관리규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000251878&type=JSON" },
-    { no: 69, name: "연안안전지킴이 운영규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000275534&type=JSON" },
-    { no: 70, name: "연안체험활동 안전교육 운영에 관한 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000215085&type=JSON" },
+    { no: 65, name: "수색구조수당 지급 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000188479&type=JSON" },
+    { no: 66, name: "어선 출입항신고 관리 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000192325&type=JSON" },
+    { no: 67, name: "연안사고 안전관리규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000251878&type=JSON" },
+    { no: 68, name: "연안안전지킴이 운영규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000275534&type=JSON" },
+    { no: 69, name: "연안체험활동 안전교육 운영에 관한 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000215085&type=JSON" },
 ];
 
 export default async (req, context) => {
