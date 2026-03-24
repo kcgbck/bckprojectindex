@@ -21,7 +21,7 @@ async function fetchWithRetry(url, maxRetries = 3, delayMs = 1500) {
             if (i === maxRetries - 1) {
                 throw error; // 최대 재시도 횟수를 초과하면 최종 에러를 던짐
             }
-            await delay(delayMs * (i + 1)); // 점진적으로 대기 시간을 늘리며 재시도 (1.5초, 3초...)
+            await delay(delayMs * (i + 1)); // 점진적으로 대기 시간을 늘리며 재시도
         }
     }
 }
@@ -120,8 +120,9 @@ export default async (req, context) => {
         const updatedLaws = [];
         const API_KEY = process.env.LAW_API_KEY || "bck";
 
-        // 기존 10개에서 5개로 줄여 API 서버 부하 및 차단 방지
-        const chunkSize = 5; 
+        // [수정] Netlify 함수의 30초 시간 제한(Timeout)을 넘지 않도록
+        // 한 번에 처리하는 개수(chunkSize)를 12개로 늘리고, 대기 시간을 단축합니다.
+        const chunkSize = 12; 
         
         for (let i = 0; i < LAW_LIST.length; i += chunkSize) {
             const chunk = LAW_LIST.slice(i, i + chunkSize);
@@ -131,12 +132,13 @@ export default async (req, context) => {
                 if (!item.name || !item.api) return null;
                 const fetchUrl = item.api.replace('${API_KEY}', API_KEY);
 
-                // 동시에 5개가 완전히 똑같은 타이밍에 출발하지 않도록 미세한 시차 적용
-                await delay(index * 200); 
+                // 동시에 출발하지 않도록 짧은 시차 적용 (200ms -> 100ms로 단축)
+                await delay(index * 100); 
 
                 try {
                     // 최대 3번까지 재시도하는 커스텀 fetch 사용
-                    const data = await fetchWithRetry(fetchUrl, 3, 1000);
+                    // (Netlify 30초 제한을 고려해 실패 시 재시도 대기시간도 500ms로 단축)
+                    const data = await fetchWithRetry(fetchUrl, 3, 500);
                     
                     const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data;
                     console.log(`[성공] ${item.name}`);
@@ -161,9 +163,9 @@ export default async (req, context) => {
             // 배열에서 실패한 항목(null)을 제거하고 updatedLaws 배열에 병합
             updatedLaws.push(...results.filter(law => law !== null));
 
-            // 다음 청크로 넘어가기 전에 API 서버에 휴식 시간을 부여 (Rate Limit 회피)
+            // 다음 청크로 넘어가기 전에 API 서버에 휴식 시간을 부여 (1500ms -> 500ms로 단축)
             if (i + chunkSize < LAW_LIST.length) {
-                await delay(1500); // 1.5초 대기
+                await delay(500); 
             }
         }
 
@@ -171,7 +173,7 @@ export default async (req, context) => {
         await store.setJSON('metadata', { latestVersion: version });
         await store.setJSON('laws_data', updatedLaws);
 
-        console.log(`[동기화 완료] 버전: ${version}`);
+        console.log(`[동기화 완료] 버전: ${version}, 총 ${updatedLaws.length}개 법령 처리됨`);
         return new Response("OK", { status: 200 });
     } catch (error) {
         console.error('[치명적 오류]', error);
