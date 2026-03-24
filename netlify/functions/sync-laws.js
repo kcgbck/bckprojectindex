@@ -5,10 +5,9 @@ import { getStore } from '@netlify/blobs';
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * 재시도 로직이 포함된 fetch 함수
- * 실패 시 일정 시간 대기 후 다시 시도합니다.
+ * 재시도 로직이 포함된 fetch 함수 (시간 단축용)
  */
-async function fetchWithRetry(url, maxRetries = 3, delayMs = 1500) {
+async function fetchWithRetry(url, maxRetries = 2, delayMs = 300) {
     for (let i = 0; i < maxRetries; i++) {
         try {
             const response = await fetch(url);
@@ -19,9 +18,9 @@ async function fetchWithRetry(url, maxRetries = 3, delayMs = 1500) {
         } catch (error) {
             console.warn(`[경고] fetch 실패 (재시도 ${i + 1}/${maxRetries}): ${error.message}`);
             if (i === maxRetries - 1) {
-                throw error; // 최대 재시도 횟수를 초과하면 최종 에러를 던짐
+                throw error; // 최대 재시도 횟수 초과 시 최종 에러
             }
-            await delay(delayMs * (i + 1)); // 점진적으로 대기 시간을 늘리며 재시도
+            await delay(delayMs); // 단축된 고정 대기 시간 사용
         }
     }
 }
@@ -112,35 +111,30 @@ const LAW_LIST = [
 
 export default async (req, context) => {
     try {
-        // [중요] 이름만 전달하여 가장 기본적으로 스토어 열기
         const store = getStore('coast-guard-laws');
         const updatedLaws = [];
         const API_KEY = process.env.LAW_API_KEY || "bck";
 
-        // [수정] Netlify 함수의 30초 시간 제한(Timeout)을 넘지 않도록
-        // 한 번에 처리하는 개수(chunkSize)를 12개로 늘리고, 대기 시간을 단축합니다.
-        const chunkSize = 12; 
+        // [최적화] 청크 크기를 20개로 늘림 (루프 횟수 감소)
+        const chunkSize = 20; 
         
         for (let i = 0; i < LAW_LIST.length; i += chunkSize) {
             const chunk = LAW_LIST.slice(i, i + chunkSize);
             
-            // chunkSize 만큼 병렬 처리하되, 재시도 로직 적용
             const promises = chunk.map(async (item, index) => {
                 if (!item.name || !item.api) return null;
                 const fetchUrl = item.api.replace('${API_KEY}', API_KEY);
 
-                // 동시에 출발하지 않도록 짧은 시차 적용 (200ms -> 100ms로 단축)
-                await delay(index * 100); 
+                // [최적화] 시차 대기 시간을 50ms로 대폭 단축
+                await delay(index * 50); 
 
                 try {
-                    // 최대 3번까지 재시도하는 커스텀 fetch 사용
-                    // (Netlify 30초 제한을 고려해 실패 시 재시도 대기시간도 500ms로 단축)
-                    const data = await fetchWithRetry(fetchUrl, 3, 500);
+                    // [최적화] 재시도 2번, 대기시간 300ms로 단축
+                    const data = await fetchWithRetry(fetchUrl, 2, 300);
                     
                     const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data;
                     console.log(`[성공] ${item.name}`);
                     
-                    // 성공 시 데이터 객체 반환
                     return {
                         id: basicInfo?.법령ID || basicInfo?.engLawId || `law_${item.no}`,
                         title: item.name,
@@ -148,24 +142,21 @@ export default async (req, context) => {
                         lastUpdated: basicInfo?.시행일자 || basicInfo?.enfDt || new Date().toISOString()
                     };
                 } catch (err) {
-                    // 재시도를 모두 실패한 경우 최종 에러 출력
                     console.error(`[최종 에러] ${item.name}: ${err.message}`);
-                    return null; // 실패 시 null 반환하여 다른 요청에 영향을 주지 않음
+                    return null; 
                 }
             });
 
-            // 청크 내의 요청들이 모두 완료될 때까지 대기
             const results = await Promise.all(promises);
-            
-            // 배열에서 실패한 항목(null)을 제거하고 updatedLaws 배열에 병합
             updatedLaws.push(...results.filter(law => law !== null));
 
-            // 다음 청크로 넘어가기 전에 API 서버에 휴식 시간을 부여 (1500ms -> 500ms로 단축)
+            // [최적화] 청크 간 대기 시간 200ms로 대폭 단축
             if (i + chunkSize < LAW_LIST.length) {
-                await delay(500); 
+                await delay(200); 
             }
         }
 
+        // Netlify 블롭에 데이터 저장 (이 작업이 수행되어야 최종 동기화 완료됨)
         const version = new Date().toISOString();
         await store.setJSON('metadata', { latestVersion: version });
         await store.setJSON('laws_data', updatedLaws);
