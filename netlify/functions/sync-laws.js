@@ -1,6 +1,31 @@
 import { schedule } from '@netlify/functions';
 import { getStore } from '@netlify/blobs';
 
+// 지정된 시간(ms)만큼 대기하는 헬퍼 함수
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * 재시도 로직이 포함된 fetch 함수
+ * 실패 시 일정 시간 대기 후 다시 시도합니다.
+ */
+async function fetchWithRetry(url, maxRetries = 3, delayMs = 1500) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP 상태 코드 에러: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.warn(`[경고] fetch 실패 (재시도 ${i + 1}/${maxRetries}): ${error.message}`);
+            if (i === maxRetries - 1) {
+                throw error; // 최대 재시도 횟수를 초과하면 최종 에러를 던짐
+            }
+            await delay(delayMs * (i + 1)); // 점진적으로 대기 시간을 늘리며 재시도 (1.5초, 3초...)
+        }
+    }
+}
+
 const LAW_LIST = [
     { no: 1, name: "낚시 관리 및 육성법", api: "https://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=011350&type=JSON" },
     { no: 2, name: "낚시 관리 및 육성법 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=011698&type=JSON" },
@@ -95,20 +120,23 @@ export default async (req, context) => {
         const updatedLaws = [];
         const API_KEY = process.env.LAW_API_KEY || "bck";
 
-        // 기존의 1개씩 처리하는 for문을 삭제하고, 10개씩 병렬로 처리하도록 변경합니다.
-        const chunkSize = 10; 
+        // 기존 10개에서 5개로 줄여 API 서버 부하 및 차단 방지
+        const chunkSize = 5; 
+        
         for (let i = 0; i < LAW_LIST.length; i += chunkSize) {
             const chunk = LAW_LIST.slice(i, i + chunkSize);
             
-            // 10개의 API 요청을 동시에 생성
-            const promises = chunk.map(async (item) => {
+            // chunkSize 만큼 병렬 처리하되, 재시도 로직 적용
+            const promises = chunk.map(async (item, index) => {
                 if (!item.name || !item.api) return null;
                 const fetchUrl = item.api.replace('${API_KEY}', API_KEY);
 
+                // 동시에 5개가 완전히 똑같은 타이밍에 출발하지 않도록 미세한 시차 적용
+                await delay(index * 200); 
+
                 try {
-                    const response = await fetch(fetchUrl);
-                    if (!response.ok) throw new Error(`${item.name} 응답 에러`);
-                    const data = await response.json();
+                    // 최대 3번까지 재시도하는 커스텀 fetch 사용
+                    const data = await fetchWithRetry(fetchUrl, 3, 1000);
                     
                     const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data;
                     console.log(`[성공] ${item.name}`);
@@ -121,16 +149,22 @@ export default async (req, context) => {
                         lastUpdated: basicInfo?.시행일자 || basicInfo?.enfDt || new Date().toISOString()
                     };
                 } catch (err) {
-                    console.error(`[에러] ${item.name}: ${err.message}`);
+                    // 재시도를 모두 실패한 경우 최종 에러 출력
+                    console.error(`[최종 에러] ${item.name}: ${err.message}`);
                     return null; // 실패 시 null 반환하여 다른 요청에 영향을 주지 않음
                 }
             });
 
-            // 10개의 요청이 모두 완료될 때까지 기다림 (약 1~2초 소요)
+            // 청크 내의 요청들이 모두 완료될 때까지 대기
             const results = await Promise.all(promises);
             
             // 배열에서 실패한 항목(null)을 제거하고 updatedLaws 배열에 병합
             updatedLaws.push(...results.filter(law => law !== null));
+
+            // 다음 청크로 넘어가기 전에 API 서버에 휴식 시간을 부여 (Rate Limit 회피)
+            if (i + chunkSize < LAW_LIST.length) {
+                await delay(1500); // 1.5초 대기
+            }
         }
 
         const version = new Date().toISOString();
