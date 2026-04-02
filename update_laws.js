@@ -113,6 +113,7 @@ async function main() {
     try {
         console.log("데이터 동기화 시작...");
         const updatedLaws = [];
+        // GitHub Actions 환경에서는 process.env.LAW_API_KEY를 Secret으로 등록해야 합니다.
         const API_KEY = process.env.LAW_API_KEY || "bck";
         
         // 청크 크기를 20개로 늘림
@@ -127,8 +128,34 @@ async function main() {
                 
                 await delay(index * 50); 
                 try {
-                    const data = await fetchWithRetry(fetchUrl, 2, 300);
-                    console.log(`[성공] ${item.name} (HTML 수집 완료)`);
+                    // 1. 껍데기 HTML 수집
+                    const wrapperData = await fetchWithRetry(fetchUrl, 2, 300);
+                    let finalHtml = wrapperData;
+                    
+                    // 2. 껍데기 HTML에서 실제 법령 내용이 담긴 iframe 주소(src)를 정규식으로 추출
+                    const iframeMatch = wrapperData.match(/src\s*=\s*["']([^"']+)["']/i);
+                    
+                    if (iframeMatch && iframeMatch[1]) {
+                        let innerUrl = iframeMatch[1].replace(/&amp;/g, '&');
+                        
+                        // 추출된 주소가 상대경로일 경우 도메인 강제 결합
+                        if (innerUrl.startsWith('/')) {
+                            innerUrl = 'https://www.law.go.kr' + innerUrl;
+                        }
+                        
+                        // 3. 진짜 알맹이 주소로 다시 요청하여 상세 HTML 가져오기 (API 과부하 방지 위해 50ms 대기)
+                        await delay(50);
+                        const innerData = await fetchWithRetry(innerUrl, 2, 300);
+                        
+                        // 4. 모바일 앱이나 웹에서 <base> 태그가 없으면 CSS와 법령 간 링크가 깨지므로 강제 주입
+                        if (/<head>/i.test(innerData)) {
+                            finalHtml = innerData.replace(/<head>/i, '<head><base href="https://www.law.go.kr">');
+                        } else {
+                            finalHtml = '<base href="https://www.law.go.kr">' + innerData;
+                        }
+                    }
+                    
+                    console.log(`[성공] ${item.name} (알맹이 HTML 수집 완료)`);
                     
                     const urlIdMatch = item.api.match(/ID=([0-9a-zA-Z]+)/);
                     const lawId = urlIdMatch ? urlIdMatch[1] : `law_${item.no}`;
@@ -136,7 +163,7 @@ async function main() {
                     return {
                         id: lawId,
                         title: item.name,
-                        html_content: data,
+                        html_content: finalHtml, // 진짜 알맹이 HTML 저장
                         lastUpdated: new Date().toISOString().split('T')[0]
                     };
                 } catch (err) {
@@ -159,7 +186,7 @@ async function main() {
             data: updatedLaws 
         };
 
-        // GitHub 저장소 안에 laws_data.json 파일로 저장 (경로 오류 수정)
+        // GitHub 저장소 안에 laws_data.json 파일로 저장
         fs.writeFileSync('./laws_data.json', JSON.stringify(finalData, null, 2), 'utf-8');
         console.log(`[동기화 완료] 버전: ${version}, 총 ${updatedLaws.length}개 법령 처리됨`);
 
