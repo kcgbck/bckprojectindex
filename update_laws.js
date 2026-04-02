@@ -4,12 +4,20 @@ import fs from 'fs';
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * 재시도 로직이 포함된 fetch 함수 (시간 단축용)
+ * 재시도 로직이 포함된 fetch 함수 (시간 단축용 및 차단 우회)
  */
-async function fetchWithRetry(url, maxRetries = 2, delayMs = 300) {
+async function fetchWithRetry(url, maxRetries = 3, delayMs = 500) {
     for (let i = 0; i < maxRetries; i++) {
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: {
+                    // ⭐️ [중요] 봇(Bot) 차단을 막기 위해 일반 크롬 브라우저처럼 위장
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
+                }
+            });
+            
             if (!response.ok) {
                 throw new Error(`HTTP 상태 코드 에러: ${response.status}`);
             }
@@ -20,7 +28,8 @@ async function fetchWithRetry(url, maxRetries = 2, delayMs = 300) {
             if (i === maxRetries - 1) {
                 throw error; // 최대 재시도 횟수 초과 시 최종 에러
             }
-            await delay(delayMs); // 단축된 고정 대기 시간 사용
+            // 실패 시 대기 시간을 점진적으로 늘림
+            await delay(delayMs * (i + 1)); 
         }
     }
 }
@@ -73,4 +82,112 @@ const LAW_LIST = [
     { no: 45, name: "해양환경관리법 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=010636&type=HTML" },
     { no: 46, name: "해양환경관리법 시행령", api: "https://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=010632&type=HTML" },
     { no: 47, name: "수상에서의 수색ㆍ구조 등에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=977&type=HTML" },
-    { no: 48, name: "수상에서의 수색ㆍ구조 등에 관한 법률 시행령", api: "
+    { no: 48, name: "수상에서의 수색ㆍ구조 등에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=3997&type=HTML" },
+    { no: 49, name: "수상에서의 수색ㆍ구조 등에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=7528&type=HTML" },
+    { no: 50, name: "수상레저기구의 등록 및 검사에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=14294&type=HTML" },
+    { no: 51, name: "수상레저기구의 등록 및 검사에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=14451&type=HTML" },
+    { no: 52, name: "수상레저기구의 등록 및 검사에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=14470&type=HTML" },
+    { no: 53, name: "내수면 수상레저활동 안전관리 지원 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000225134&type=HTML" },
+    { no: 54, name: "동력수상레저기구 안전검사 기준", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000225688&type=HTML" },
+    { no: 55, name: "수상레저기구의 종류에 관한 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000249996&type=HTML" },
+    { no: 56, name: "수상레저안전업무 처리규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000249826&type=HTML" },
+    { no: 57, name: "전기추진 동력수상레저기구 설비기준", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000237242&type=HTML" },
+    { no: 58, name: "해양사고의 조사 및 심판에 관한 법률의 적용대상이 아닌 수상레저기구", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000262268&type=HTML" },
+    { no: 59, name: "수중레저 안전관리규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000261918&type=HTML" },
+    { no: 60, name: "수중형 체험활동 안전관리요원 자격 인정단체 지정에 관한 지침", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000275576&type=HTML" },
+    { no: 61, name: "불법 외국선박 나포 포상금 지급에 관한 규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000246764&type=HTML" },
+    { no: 62, name: "불법조업 외국어선 사법처리 절차 등에 관한 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000181898&type=HTML" },
+    { no: 63, name: "선박패스(V-Pass) 장치 등의 설치기준 및 운영 등에 관한 고시", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000264514&type=HTML" },
+    { no: 64, name: "수상레저사업장 종사 래프팅가이드 자격관리 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000272918&type=HTML" },
+    { no: 65, name: "수색구조수당 지급 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000188479&type=HTML" },
+    { no: 66, name: "어선 출입항신고 관리 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000192325&type=HTML" },
+    { no: 67, name: "연안사고 안전관리규정", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000251878&type=HTML" },
+    { no: 68, name: "연안안전지킴이 운영규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000275534&type=HTML" },
+    { no: 69, name: "연안체험활동 안전교육 운영에 관한 규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=admrul&ID=2100000215085&type=HTML" },
+    { no: 70, name: "공유수면 관리 및 매립에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=011186&type=HTML" },
+    { no: 71, name: "공유수면 관리 및 매립에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=011293&type=HTML" },
+    { no: 72, name: "공유수면 관리 및 매립에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=011295&type=HTML" },
+    { no: 73, name: "마리나항만의 조성 및 관리 등에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=011016&type=HTML" },
+    { no: 74, name: "마리나항만의 조성 및 관리 등에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=011115&type=HTML" },
+    { no: 75, name: "마리나항만의 조성 및 관리 등에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=011114&type=HTML" },
+    { no: 76, name: "항만법", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=001737&type=HTML" },
+    { no: 77, name: "항만법 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=005528&type=HTML" },
+    { no: 78, name: "항만법 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=008651&type=HTML" },
+    { no: 79, name: "자연유산의 보존 및 활용에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014410&type=HTML" },
+    { no: 80, name: "자연유산의 보존 및 활용에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014653&type=HTML" },
+    { no: 81, name: "자연유산의 보존 및 활용에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014669&type=HTML" }
+];
+
+async function main() {
+    try {
+        console.log("데이터 동기화 시작...");
+        const updatedLaws = [];
+        // GitHub Actions 환경에서는 process.env.LAW_API_KEY를 Secret으로 등록해야 합니다.
+        const API_KEY = process.env.LAW_API_KEY || "bck";
+        
+        // ⭐️ [중요] 청크 크기를 20개에서 5개로 줄임 (메모리 부족 및 서버 차단 방지)
+        const chunkSize = 5; 
+        
+        for (let i = 0; i < LAW_LIST.length; i += chunkSize) {
+            const chunk = LAW_LIST.slice(i, i + chunkSize);
+            
+            const promises = chunk.map(async (item, index) => {
+                if (!item.name || !item.api) return null;
+                const fetchUrl = item.api.replace('${API_KEY}', API_KEY);
+                
+                await delay(index * 200); 
+                try {
+                    // 1. API 호출 (국가법령정보센터 DRF API는 이 자체로 완벽한 본문 HTML을 반환합니다)
+                    let htmlData = await fetchWithRetry(fetchUrl, 3, 500);
+                    
+                    // 2. 파란색 디자인(CSS)이 깨지지 않도록 <base> 태그만 심어줍니다.
+                    // 안전한 함수형 치환(replace)을 사용하여 정규식 오류 방지
+                    if (/<head[^>]*>/i.test(htmlData)) {
+                        htmlData = htmlData.replace(/(<head[^>]*>)/i, (match) => match + '\n<base href="https://www.law.go.kr">');
+                    } else {
+                        htmlData = '<base href="https://www.law.go.kr">\n' + htmlData;
+                    }
+                    
+                    console.log(`[성공] ${item.name} (본문 HTML 수집 완료)`);
+                    
+                    const urlIdMatch = item.api.match(/ID=([0-9a-zA-Z]+)/);
+                    const lawId = urlIdMatch ? urlIdMatch[1] : `law_${item.no}`;
+                    
+                    return {
+                        id: lawId,
+                        title: item.name,
+                        html_content: htmlData, // 진짜 완벽한 법령 HTML 통째로 저장
+                        lastUpdated: new Date().toISOString().split('T')[0]
+                    };
+                } catch (err) {
+                    console.error(`[최종 에러] ${item.name}: ${err.message}`);
+                    return null; 
+                }
+            });
+            
+            const results = await Promise.all(promises);
+            updatedLaws.push(...results.filter(law => law !== null));
+            
+            // 다음 묶음을 처리하기 전에 1.5초 대기 (서버 차단 확실히 방지)
+            if (i + chunkSize < LAW_LIST.length) {
+                await delay(1500); 
+            }
+        }
+        
+        const version = new Date().toISOString();
+        const finalData = {
+            metadata: { latestVersion: version },
+            data: updatedLaws 
+        };
+
+        // GitHub 저장소 안에 laws_data.json 파일로 저장
+        fs.writeFileSync('./laws_data.json', JSON.stringify(finalData, null, 2), 'utf-8');
+        console.log(`[동기화 완료] 버전: ${version}, 총 ${updatedLaws.length}개 법령 처리됨`);
+
+    } catch (error) {
+        console.error('[치명적 오류]', error);
+        process.exit(1); 
+    }
+}
+
+main();
