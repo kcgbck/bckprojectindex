@@ -1,5 +1,4 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
 
 // 지정된 시간(ms)만큼 대기하는 헬퍼 함수
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -116,7 +115,7 @@ async function main() {
         const updatedLaws = [];
         const API_KEY = process.env.LAW_API_KEY || "bck";
         
-        // [최적화] 청크 크기를 20개로 늘림 (루프 횟수 감소)
+        // 청크 크기를 20개로 늘림
         const chunkSize = 20; 
         
         for (let i = 0; i < LAW_LIST.length; i += chunkSize) {
@@ -126,24 +125,19 @@ async function main() {
                 if (!item.name || !item.api) return null;
                 const fetchUrl = item.api.replace('${API_KEY}', API_KEY);
                 
-                // [최적화] 시차 대기 시간을 50ms로 대폭 단축
                 await delay(index * 50); 
                 try {
-                    // [최적화] 재시도 2번, 대기시간 300ms로 단축
-                    // fetchUrl을 통해 HTML 텍스트 원본이 수집됨
                     const data = await fetchWithRetry(fetchUrl, 2, 300);
-                    
                     console.log(`[성공] ${item.name} (HTML 수집 완료)`);
                     
-                    // URL 자체에서 ID를 뽑아내고, 수집한 시점을 저장하도록 변경.
                     const urlIdMatch = item.api.match(/ID=([0-9a-zA-Z]+)/);
                     const lawId = urlIdMatch ? urlIdMatch[1] : `law_${item.no}`;
                     
                     return {
                         id: lawId,
                         title: item.name,
-                        html_content: data, // 파싱하지 않고 HTML 전체를 그대로 저장
-                        lastUpdated: new Date().toISOString().split('T')[0] // 오늘 날짜 기록
+                        html_content: data,
+                        lastUpdated: new Date().toISOString().split('T')[0]
                     };
                 } catch (err) {
                     console.error(`[최종 에러] ${item.name}: ${err.message}`);
@@ -154,7 +148,6 @@ async function main() {
             const results = await Promise.all(promises);
             updatedLaws.push(...results.filter(law => law !== null));
             
-            // [최적화] 청크 간 대기 시간 200ms로 대폭 단축
             if (i + chunkSize < LAW_LIST.length) {
                 await delay(200); 
             }
@@ -166,8 +159,8 @@ async function main() {
             data: updatedLaws 
         };
 
-        // GitHub 저장소 안에 laws_data.json 이라는 텍스트 파일로 저장
-        fs.writeFileSync(path.join(__dirname, 'laws_data.json'), JSON.stringify(finalData, null, 2), 'utf-8');
+        // GitHub 저장소 안에 laws_data.json 파일로 저장 (경로 오류 수정)
+        fs.writeFileSync('./laws_data.json', JSON.stringify(finalData, null, 2), 'utf-8');
         console.log(`[동기화 완료] 버전: ${version}, 총 ${updatedLaws.length}개 법령 처리됨`);
 
     } catch (error) {
