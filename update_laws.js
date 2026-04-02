@@ -132,8 +132,11 @@ async function main() {
                     const wrapperData = await fetchWithRetry(fetchUrl, 2, 300);
                     let finalHtml = wrapperData;
                     
-                    // 2. 껍데기 HTML에서 실제 법령 내용이 담긴 iframe 주소(src)를 정규식으로 추출
-                    const iframeMatch = wrapperData.match(/src\s*=\s*["']([^"']+)["']/i);
+                    // ⭐️ [가장 중요 - 수정된 부분]
+                    // 기존: wrapperData.match(/src\s*=\s*["']([^"']+)["']/i)
+                    // 문제원인: <script src="..."> 나 <img src="..."> 의 주소를 긁어와버림.
+                    // 해결: 반드시 <iframe 으로 시작하는 태그 안의 src만 긁어오도록 정규식 수정
+                    const iframeMatch = wrapperData.match(/<iframe[^>]*src\s*=\s*["']([^"']+)["']/i);
                     
                     if (iframeMatch && iframeMatch[1]) {
                         let innerUrl = iframeMatch[1].replace(/&amp;/g, '&');
