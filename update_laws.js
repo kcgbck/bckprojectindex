@@ -106,7 +106,10 @@ const LAW_LIST = [
     { no: 78, name: "항만법 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=008651&type=JSON" },
     { no: 79, name: "자연유산의 보존 및 활용에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014410&type=JSON" },
     { no: 80, name: "자연유산의 보존 및 활용에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014653&type=JSON" },
-    { no: 81, name: "자연유산의 보존 및 활용에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014669&type=JSON" }
+    { no: 81, name: "자연유산의 보존 및 활용에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014669&type=JSON" },
+    { no: 82, name: "경범죄 처벌법", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=1674&type=HTML" },
+    { no: 83, name: "경범죄 처벌법 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2144&type=HTML" },
+    { no: 84, name: "경범죄 처벌법 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=6220&type=HTML" },
 ];
 
 async function main() {
