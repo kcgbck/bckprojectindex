@@ -108,6 +108,9 @@ const LAW_LIST = [
     { no: 79, name: "자연유산의 보존 및 활용에 관한 법률", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014410&type=HTML" },
     { no: 80, name: "자연유산의 보존 및 활용에 관한 법률 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014653&type=HTML" },
     { no: 81, name: "자연유산의 보존 및 활용에 관한 법률 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014669&type=HTML" },
+    { no: 82, name: "경범죄 처벌법", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=1674&type=HTML" },
+    { no: 83, name: "경범죄 처벌법 시행령", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=2144&type=HTML" },
+    { no: 84, name: "경범죄 처벌법 시행규칙", api: "http://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=6220&type=HTML" },
 ];
 
 export default async (req, context) => {
