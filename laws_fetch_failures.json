@@ -1,0 +1,10 @@
+{
+  "date": "2026-05-31T15:25:08.769Z",
+  "total": 84,
+  "successCount": 83,
+  "failCount": 1,
+  "successRate": 99,
+  "failedLaws": [
+    "해양경비법"
+  ]
+}
