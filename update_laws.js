@@ -147,7 +147,7 @@ async function main() {
         // 청크 간 대기 (Rate Limit 해제)
         if (i + chunkSize < LAW_LIST.length) {
             console.log(`[대기] 다음 청크까지 3초 대기...`);
-            await delay(3000);
+            await delay(7000);
         }
     }
 
