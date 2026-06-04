@@ -22,18 +22,22 @@ jobs:
         with:
           node-version: '20'
 
-# 1. Tailscale에 접속하여 내 집 PC(yechan) IP를 우회 도로로 지정
+# 플러그인 버그를 우회하여 리눅스 명령어로 직접 Tailscale 연결 및 Exit Node 강제 적용
       - name: Connect to Tailscale (한국 IP 우회)
-        uses: tailscale/github-action@v2
-        with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          # 윈도우 Exit Node 버그를 방지하고 30초 타임아웃을 강제로 거는 핵심 옵션들입니다.
-          args: --exit-node=100.92.111.98 --exit-node-allow-lan-access --timeout=30s
-          snat-subnet-routes: false
-
-      # 2. 기존에 사용하시던 파이썬 스크립트 실행 단계 (예시)
-      - name: Run Legal Data Downloader
-        run: python download.py
+        env:
+          TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+        run: |
+          # 1. Tailscale 공식 설치 스크립트 실행
+          curl -fsSL https://tailscale.com/install.sh | sh
+          
+          # 2. Tailscale 백그라운드 엔진(데몬) 시작
+          sudo tailscaled --state=mem: &
+          
+          # 3. 엔진이 켜질 때까지 잠시 대기 (5초)
+          sleep 5
+          
+          # 4. 내 집 PC(100.92.111.98)를 Exit Node로 지정하여 강제 로그인 및 연결 완료대기(최대 20초)
+          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --exit-node=100.92.111.98 --exit-node-allow-lan-access --accept-routes --timeout=20s
 
       - name: 법령 데이터 갱신 스크립트 실행
         id: run_update
