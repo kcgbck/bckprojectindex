@@ -28,7 +28,7 @@ jobs:
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
           # 아까 확인한 yechan PC의 Tailscale IP를 적어줍니다.
-          args: --exit-node=100.92.111.98 --exit-node-allow-lan-access
+          args: --exit-node=100.92.111.98 --exit-node-allow-lan-access --timeout=15s
 
       # 2. 기존에 사용하시던 파이썬 스크립트 실행 단계 (예시)
       - name: Run Legal Data Downloader
