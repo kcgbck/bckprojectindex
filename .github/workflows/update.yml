@@ -22,6 +22,18 @@ jobs:
         with:
           node-version: '20'
 
+# 1. Tailscale에 접속하여 내 집 PC(yechan) IP를 우회 도로로 지정
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          # 아까 확인한 yechan PC의 Tailscale IP를 적어줍니다.
+          args: --exit-node=100.92.111.98 --exit-node-allow-lan-access
+
+      # 2. 기존에 사용하시던 파이썬 스크립트 실행 단계 (예시)
+      - name: Run Legal Data Downloader
+        run: python download.py
+
       - name: 법령 데이터 갱신 스크립트 실행
         id: run_update
         env:
