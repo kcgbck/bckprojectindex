@@ -1,8 +1,11 @@
 @echo off
+:: 한글 깨짐 방지 (UTF-8 인코딩 강제 지정)
+chcp 65001 > nul
+
 :: 작업 디렉토리를 이 파일이 있는 폴더로 고정
 cd /d "%~dp0"
 
-:: 1. 오늘의 날짜 구하기 (YYYY-MM-DD 형식)
+:: 1. 오늘의 날짜 구하기 (YYYY-MM-DD 형식으로 통일)
 for /f "tokens=1-3 delims=-/. " %%a in ('date /t') do (set mydate=%%a-%%b-%%c)
 
 :: 2. 기존에 기록된 마지막 실행 날짜 읽기
@@ -20,8 +23,8 @@ if "%mydate%"=="%lastdate%" (
 :: 4. [오늘 첫 실행인 경우] 실제 작업 수행
 :: ==========================================
 
-:: 파이썬 다운로드 스크립트 실행
-python download.py
+:: 기존 Node.js 법령 수집 스크립트 실행
+node update_laws.js
 
 :: Git 명령어로 GitHub에 자동 업로드
 git add .
