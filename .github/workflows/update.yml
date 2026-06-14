@@ -22,17 +22,6 @@ jobs:
         with:
           node-version: '20'
 
-# 충돌 문제를 해결한 리눅스 직통 Tailscale 연결 코드
-      - name: Connect to Tailscale (한국 IP 우회)
-        env:
-          TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
-        run: |
-          # 1. Tailscale 공식 설치 (여기서 엔진이 자동으로 안전하게 켜집니다)
-          curl -fsSL https://tailscale.com/install.sh | sh
-          
-          # 2. 이미 켜진 엔진에 로그인 명령 및 Exit Node 연동만 바로 수행 (타임아웃 30초)
-          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --exit-node=100.92.111.98 --exit-node-allow-lan-access --accept-routes --timeout=30s
-
       - name: 법령 데이터 갱신 스크립트 실행
         id: run_update
         env:
