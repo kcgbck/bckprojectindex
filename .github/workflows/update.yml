@@ -10,9 +10,14 @@ permissions:
   contents: write
   issues: write  # 실패 시 이슈 생성을 위해 필요
 
+concurrency:
+  group: update-laws-data
+  cancel-in-progress: true
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: 내 저장소 코드 가져오기
         uses: actions/checkout@v4

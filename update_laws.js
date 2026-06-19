@@ -14,7 +14,7 @@ async function fetchWithRetry(url, maxRetries = 3, delayMs = 2000, timeoutMs = 3
             return await response.json();
         } catch (error) {
             clearTimeout(timer);
-            const reason = error.name === 'AbortError' ? '타임아웃(30s)' : error.message;
+            const reason = error.name === 'AbortError' ? `타임아웃(${Math.round(timeoutMs / 1000)}s)` : error.message;
             console.warn(`[경고] fetch 실패 (재시도 ${i + 1}/${maxRetries}): ${reason}`);
             if (i === maxRetries - 1) throw new Error(reason);
             await delay(delayMs);
@@ -113,10 +113,15 @@ const LAW_LIST = [
     { no: 87, name: "해상교통안전법 시행규칙",                                    api: "https://www.law.go.kr/DRF/lawService.do?OC=bck&target=eflaw&ID=014619&type=JSON" },
 ];
 
+const MIN_SUCCESS_RATE = 50;
+const FETCH_TIMEOUT_MS = 15000;
+const MAX_FAILED_BEFORE_ABORT = Math.floor(LAW_LIST.length * (100 - MIN_SUCCESS_RATE) / 100) + 1;
+
 async function main() {
     console.log("데이터 동기화 시작...");
     const updatedLaws = [];
     const failedLaws = [];
+    let abortedEarly = false;
 
     // 청크 5개씩 순차 처리 (Rate Limit 방지)
     const chunkSize = 5;
@@ -128,7 +133,7 @@ async function main() {
         for (const item of chunk) {
             if (!item.name || !item.api) continue;
             try {
-                const data = await fetchWithRetry(item.api, 3, 2000, 30000);
+                const data = await fetchWithRetry(item.api, 3, 2000, FETCH_TIMEOUT_MS);
                 const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data;
                 console.log(`[성공] ${item.name}`);
                 updatedLaws.push({
@@ -140,9 +145,16 @@ async function main() {
             } catch (err) {
                 console.error(`[최종 에러] ${item.name}: ${err.message}`);
                 failedLaws.push(item.name);
+                if (failedLaws.length >= MAX_FAILED_BEFORE_ABORT) {
+                    abortedEarly = true;
+                    console.error(`[중단] 실패 ${failedLaws.length}개로 성공률 ${MIN_SUCCESS_RATE}% 이상 달성이 불가능하여 남은 수집을 중단합니다.`);
+                    break;
+                }
             }
             await delay(300);
         }
+
+        if (abortedEarly) break;
 
         // 청크 간 대기 (Rate Limit 해제)
         if (i + chunkSize < LAW_LIST.length) {
@@ -168,7 +180,7 @@ async function main() {
     // laws_data.json 저장 (성공한 것만)
     const version = new Date().toISOString();
     fs.writeFileSync('./laws_data.json', JSON.stringify({
-        metadata: { latestVersion: version, successCount, failCount, successRate },
+        metadata: { latestVersion: version, successCount, failCount, successRate, abortedEarly },
         data: updatedLaws
     }, null, 2), 'utf-8');
     console.log(`\n[저장 완료] laws_data.json (버전: ${version})`);
@@ -181,6 +193,7 @@ async function main() {
             successCount,
             failCount,
             successRate,
+            abortedEarly,
             failedLaws
         }, null, 2), 'utf-8');
         console.log(`[실패 기록] laws_fetch_failures.json 저장됨`);
@@ -190,8 +203,8 @@ async function main() {
     }
 
     // 성공률 50% 미만이면 워크플로 실패 처리
-    if (successRate < 50) {
-        console.error(`\n❌ 성공률 ${successRate}%로 기준치(50%) 미달. 워크플로를 실패 처리합니다.`);
+    if (successRate < MIN_SUCCESS_RATE) {
+        console.error(`\n❌ 성공률 ${successRate}%로 기준치(${MIN_SUCCESS_RATE}%) 미달. 워크플로를 실패 처리합니다.`);
         process.exit(1);
     }
 }
