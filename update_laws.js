@@ -184,6 +184,9 @@ async function main() {
             failedLaws
         }, null, 2), 'utf-8');
         console.log(`[실패 기록] laws_fetch_failures.json 저장됨`);
+    } else if (fs.existsSync('./laws_fetch_failures.json')) {
+        fs.unlinkSync('./laws_fetch_failures.json');
+        console.log(`[실패 기록 정리] 이전 laws_fetch_failures.json 삭제됨`);
     }
 
     // 성공률 50% 미만이면 워크플로 실패 처리
