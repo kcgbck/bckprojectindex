@@ -1,0 +1,28 @@
+{
+  "date": "2026-07-06T16:55:32.986Z",
+  "dateKst": "2026. 7. 7. 1:55:32",
+  "total": 87,
+  "successCount": 0,
+  "failCount": 1,
+  "successRate": 0,
+  "abortedEarly": true,
+  "abortReason": "첫 법령의 3회 재시도가 모두 연결 단계 오류로 실패하여 동일 호스트의 나머지 요청을 중단함",
+  "failedLaws": [
+    "낚시 관리 및 육성법"
+  ],
+  "diagnosticSummary": {
+    "category": "TCP_CONNECT_TIMEOUT",
+    "status": null,
+    "explanation": "DNS 해석 뒤 www.law.go.kr:443 TCP 연결이 시간초과됐습니다. HTTP 요청·OC 인증에는 도달하지 못했습니다. GitHub Actions 출구 IP에 대한 방화벽 드롭, 통신 경로 장애, 대상 서버의 연결 수락 문제 중 하나일 수 있습니다.",
+    "confidence": "높음: API 인증/HTTP 응답 이전 네트워크 단계의 실패임",
+    "ipBlockConclusion": "확정 불가: GitHub 출구 IP 차단, 중간 경로 차단, 대상 서버 연결 장애가 모두 같은 현상을 낼 수 있음. 다른 고정 IP(예: Oracle Tokyo)에서 같은 진단을 비교해야 IP 차단을 판정할 수 있음."
+  },
+  "egressIp": "40.76.181.211",
+  "apiConnectionProbe": {
+    "phase": "request_error",
+    "category": "APPLICATION_TIMEOUT",
+    "status": null,
+    "elapsedMs": 15010
+  },
+  "diagnosticFile": "./laws_fetch_diagnostics.json"
+}
