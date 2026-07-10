@@ -1,6 +1,6 @@
 {
-  "date": "2026-07-09T16:31:09.103Z",
-  "dateKst": "2026. 7. 10. 1:31:09",
+  "date": "2026-07-10T16:28:42.904Z",
+  "dateKst": "2026. 7. 11. 1:28:42",
   "total": 87,
   "successCount": 0,
   "failCount": 1,
@@ -17,12 +17,12 @@
     "confidence": "높음: API 인증/HTTP 응답 이전 네트워크 단계의 실패임",
     "ipBlockConclusion": "확정 불가: GitHub 출구 IP 차단, 중간 경로 차단, 대상 서버 연결 장애가 모두 같은 현상을 낼 수 있음. 다른 고정 IP(예: Oracle Tokyo)에서 같은 진단을 비교해야 IP 차단을 판정할 수 있음."
   },
-  "egressIp": "20.97.198.243",
+  "egressIp": "68.220.58.147",
   "apiConnectionProbe": {
     "phase": "request_error",
     "category": "APPLICATION_TIMEOUT",
     "status": null,
-    "elapsedMs": 15010
+    "elapsedMs": 15008
   },
   "diagnosticFile": "./laws_fetch_diagnostics.json"
 }
