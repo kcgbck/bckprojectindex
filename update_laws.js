@@ -1,5 +1,10 @@
 import fs from 'fs';
 
+// ==========================================
+// [필수 설정] 본인의 법령센터 API OC 값을 입력하세요.
+// ==========================================
+const API_KEY = "yechankong0512"; // <-- 이 부분을 본인의 OC 값으로 변경하세요!
+
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // 타임아웃 포함 fetch 재시도 함수
@@ -115,7 +120,11 @@ const LAW_LIST = [
 
 async function main() {
     console.log("데이터 동기화 시작...");
-    const updatedLaws = [];
+    const outputDir = './laws_txt';
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
+    let successCount = 0;
     const failedLaws = [];
 
     // 청크 5개씩 순차 처리 (Rate Limit 방지)
@@ -128,15 +137,15 @@ async function main() {
         for (const item of chunk) {
             if (!item.name || !item.api) continue;
             try {
-                const data = await fetchWithRetry(item.api, 3, 2000, 30000);
-                const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data;
-                console.log(`[성공] ${item.name}`);
-                updatedLaws.push({
-                    id: basicInfo?.법령ID || basicInfo?.engLawId || `law_${item.no}`,
-                    title: item.name,
-                    raw_data: data,
-                    lastUpdated: basicInfo?.시행일자 || basicInfo?.enfDt || new Date().toISOString().split('T')[0]
-                });
+                // 저장된 URL에서 하드코딩된 'OC=bck'를 API_KEY 값으로 동적 치환
+                const targetApiUrl = item.api.replace('OC=bck', `OC=${API_KEY}`);
+                const data = await fetchWithRetry(targetApiUrl, 3, 2000, 30000);
+                
+                const safeName = item.name.replace(/[\\/:*?"<>|]/g, "");
+                fs.writeFileSync(`${outputDir}/${safeName}.txt`, JSON.stringify(data, null, 2), 'utf-8');
+                
+                console.log(`[성공] ${item.name} -> ${safeName}.txt 생성`);
+                successCount++;
             } catch (err) {
                 console.error(`[최종 에러] ${item.name}: ${err.message}`);
                 failedLaws.push(item.name);
@@ -153,7 +162,6 @@ async function main() {
 
     // 결과 집계 출력
     const total = LAW_LIST.length;
-    const successCount = updatedLaws.length;
     const failCount = failedLaws.length;
     const successRate = Math.round((successCount / total) * 100);
 
@@ -165,13 +173,7 @@ async function main() {
         failedLaws.forEach(name => console.log(`  - ${name}`));
     }
 
-    // laws_data.json 저장 (성공한 것만)
     const version = new Date().toISOString();
-    fs.writeFileSync('./laws_data.json', JSON.stringify({
-        metadata: { latestVersion: version, successCount, failCount, successRate },
-        data: updatedLaws
-    }, null, 2), 'utf-8');
-    console.log(`\n[저장 완료] laws_data.json (버전: ${version})`);
 
     // 실패 목록을 파일로 저장 (워크플로에서 이슈 생성에 활용)
     if (failedLaws.length > 0) {
