@@ -3,7 +3,12 @@
     "latestVersion": "2026-07-23T15:12:01.240Z",
     "successCount": 87,
     "failCount": 0,
-    "successRate": 100
+    "successRate": 100,
+    "abortedEarly": false,
+    "abortReason": null,
+    "fetchedCount": 87,
+    "retainedPreviousCount": 0,
+    "totalDataCount": 87
   },
   "data": [
     {
