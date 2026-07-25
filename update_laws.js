@@ -190,7 +190,7 @@ function explanationForCategory(category, status = null) {
 
 function buildApiUrl(rawUrl) {
     const url = new URL(rawUrl);
-    url.searchParams.set('OC', LAW_API_KEY);
+    url.searchParams.set('OC', LAW_API_KEY || API_KEY);
     return url.toString();
 }
 
@@ -531,33 +531,82 @@ function preserveOrMergeData(updatedLaws, successRate, metadata) {
 }
 
 async function main() {
-    console.log("데이터 동기화 시작...");
+    const startedAt = nowIso();
+    console.log('데이터 동기화 시작...');
+    console.log(`[실행 환경] node=${process.version}, os=${os.platform()} ${os.release()}, runner=${process.env.RUNNER_NAME ?? 'local'}`);
+
+    const preflightUrl = buildApiUrl(LAW_LIST[0].api);
+    const [egressIp, lawHostDns, apiConnectionProbe] = await Promise.all([
+        getPublicEgressIp(),
+        resolveLawHost(),
+        probeHttpsConnection(preflightUrl),
+    ]);
+
+    const preflight = {
+        checkedAt: nowIso(),
+        runner: {
+            runnerName: process.env.RUNNER_NAME ?? null,
+            runnerOs: process.env.RUNNER_OS ?? os.platform(),
+            githubRunId: process.env.GITHUB_RUN_ID ?? null,
+            githubRunAttempt: process.env.GITHUB_RUN_ATTEMPT ?? null,
+            node: process.version,
+        },
+        egressIp,
+        lawHostDns,
+        apiConnectionProbe,
+    };
+
+    console.log(`[사전 진단] 출구 IP: ${egressIp.ip ?? '확인 실패'} (${egressIp.service ?? 'N/A'})`);
+    console.log(`[사전 진단] law.go.kr DNS: ${JSON.stringify(lawHostDns.lookup ?? lawHostDns.lookupError ?? '확인 실패')}`);
+    console.log(`[사전 진단] API 연결: phase=${apiConnectionProbe.phase}, category=${apiConnectionProbe.category ?? 'N/A'}, status=${apiConnectionProbe.status ?? 'N/A'}, ${apiConnectionProbe.elapsedMs}ms`);
+
     const outputDir = './laws_txt';
     if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
     }
-    let successCount = 0;
+
+    const updatedLaws = [];
     const failedLaws = [];
     const failureRecords = [];
     let abortedEarly = false;
     let abortReason = null;
+    let successCount = 0;
 
     for (let i = 0; i < LAW_LIST.length; i += CHUNK_SIZE) {
         const chunk = LAW_LIST.slice(i, i + CHUNK_SIZE);
 
         for (const item of chunk) {
             try {
-                // 저장된 URL에서 하드코딩된 'OC=bck'를 API_KEY 값으로 동적 치환
-                const targetApiUrl = item.api.replace('OC=bck', `OC=${API_KEY}`);
-                const data = await fetchWithRetry(targetApiUrl, 3, 2000, 30000);
+                const { data } = await fetchJsonWithRetry(item);
+                const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data;
                 
+                // 1. 개별 txt 파일로 저장 (개별 저장 유지)
                 const safeName = item.name.replace(/[\\/:*?"<>|]/g, "");
                 fs.writeFileSync(`${outputDir}/${safeName}.txt`, JSON.stringify(data, null, 2), 'utf-8');
                 
-                console.log(`[성공] ${item.name} -> ${safeName}.txt 생성`);
+                // 2. 통합 방식 부활: laws_data.json 저장을 위해 updatedLaws 배열에 추가
+                updatedLaws.push({
+                    id: basicInfo?.법령ID || basicInfo?.engLawId || `law_${item.no}`,
+                    title: item.name,
+                    raw_data: data,
+                    lastUpdated: basicInfo?.시행일자 || basicInfo?.enfDt || new Date().toISOString().split('T')[0],
+                });
+                
+                console.log(`[성공] ${item.name} -> 개별 txt 및 통합 객체 생성`);
                 successCount++;
-            } catch (err) {
-                console.error(`[최종 에러] ${item.name}: ${err.message}`);
+            } catch (error) {
+                const category = error.category ?? classifyError(error);
+                const record = {
+                    no: item.no,
+                    name: item.name,
+                    request: error.requestUrl ?? sanitizeUrl(buildApiUrl(item.api)),
+                    category,
+                    status: error.status ?? null,
+                    explanation: explanationForCategory(category, error.status ?? null),
+                    attempts: error.attempts ?? [],
+                    finalError: errorToObject(error),
+                };
+
                 failedLaws.push(item.name);
                 failureRecords.push(record);
 
@@ -625,10 +674,10 @@ async function main() {
             abortedEarly,
             abortReason,
             dataWrite,
-        },
-        summary,
-        failureRecords: failureRecords.slice(0, 10),
-    };
+            summary,
+            failureRecords: failureRecords.slice(0, 10),
+        }, null, 2), 'utf-8');
+    }
 
     const shouldPersistDiagnostics =
         failedLaws.length > 0 ||
