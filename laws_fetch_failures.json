@@ -1,127 +1,101 @@
 {
-  "date": "2026-07-27T16:26:25.864Z",
+  "date": "2026-07-28T16:15:13.134Z",
   "total": 87,
-  "successCount": 0,
+  "successCount": 86,
   "failCount": 1,
-  "successRate": 0,
-  "abortedEarly": true,
-  "abortReason": "첫 법령의 3회 재시도가 모두 연결 단계 오류로 실패하여 동일 호스트의 나머지 요청을 중단함",
+  "successRate": 99,
+  "abortedEarly": false,
+  "abortReason": null,
   "dataWrite": {
-    "wroteData": false,
+    "wroteData": true,
     "dataCount": 87,
-    "preservedPrevious": true,
-    "reason": "성공률 0%가 기준 50% 미만이어서 기존 ./laws_data.json를 보존함"
+    "preservedPrevious": false,
+    "reason": "성공 86개를 반영하고 실패 항목은 기존 데이터에서 보존함"
   },
   "summary": {
-    "category": "TCP_CONNECT_TIMEOUT",
-    "status": null,
-    "explanation": "DNS 해석 뒤 www.law.go.kr:443 TCP 연결이 시간초과됐습니다. HTTP 요청·OC 인증에는 도달하지 못했습니다. GitHub Actions 출구 IP에 대한 방화벽 드롭, 통신 경로 장애, 대상 서버의 연결 수락 문제 중 하나일 수 있습니다.",
-    "confidence": "높음: API 인증/HTTP 응답 이전 네트워크 단계의 실패임",
-    "ipBlockConclusion": "확정 불가: GitHub 출구 IP 차단, 중간 경로 차단, 대상 서버 연결 장애가 모두 같은 현상을 낼 수 있음. 다른 고정 IP(예: Oracle Tokyo)에서 같은 진단을 비교해야 IP 차단을 판정할 수 있음."
+    "category": "APPLICATION_TIMEOUT",
+    "status": 200,
+    "explanation": "스크립트가 정한 시간 제한 안에 응답을 받지 못했습니다.",
+    "confidence": "제한적: 추가 실행 로그와 error.cause 확인 필요",
+    "ipBlockConclusion": "현 단계에서 IP 차단 여부를 확정할 수 없음"
   },
   "failureRecords": [
     {
-      "no": 1,
-      "name": "낚시 관리 및 육성법",
-      "request": "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=011350&type=JSON&OC=***",
-      "category": "TCP_CONNECT_TIMEOUT",
+      "no": 2,
+      "name": "낚시 관리 및 육성법 시행규칙",
+      "request": "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=011698&type=JSON&OC=***",
+      "category": "APPLICATION_TIMEOUT",
       "status": null,
-      "explanation": "DNS 해석 뒤 www.law.go.kr:443 TCP 연결이 시간초과됐습니다. HTTP 요청·OC 인증에는 도달하지 못했습니다. GitHub Actions 출구 IP에 대한 방화벽 드롭, 통신 경로 장애, 대상 서버의 연결 수락 문제 중 하나일 수 있습니다.",
+      "explanation": "스크립트가 정한 시간 제한 안에 응답을 받지 못했습니다.",
       "attempts": [
         {
           "attempt": 1,
           "ok": false,
-          "category": "TCP_CONNECT_TIMEOUT",
-          "elapsedMs": 10498,
+          "category": "HTTP_ERROR",
+          "elapsedMs": 162,
           "error": {
-            "name": "TypeError",
-            "message": "fetch failed",
+            "name": "HttpStatusError",
+            "message": "HTTP 404",
             "code": null,
             "errno": null,
             "syscall": null,
             "address": null,
             "port": null,
-            "elapsedMs": 10498,
-            "cause": {
-              "name": "ConnectTimeoutError",
-              "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
-              "code": "UND_ERR_CONNECT_TIMEOUT",
-              "errno": null,
-              "syscall": null,
-              "address": null,
-              "port": null
-            }
+            "status": 404,
+            "statusText": "Not Found",
+            "headers": {
+              "content-length": "0",
+              "date": "Tue, 28 Jul 2026 16:07:15 GMT",
+              "server": "Apache"
+            },
+            "elapsedMs": 162
           }
         },
         {
           "attempt": 2,
           "ok": false,
-          "category": "TCP_CONNECT_TIMEOUT",
-          "elapsedMs": 10493,
+          "category": "APPLICATION_TIMEOUT",
+          "elapsedMs": 15000,
           "error": {
-            "name": "TypeError",
-            "message": "fetch failed",
-            "code": null,
+            "name": "AbortError",
+            "message": "This operation was aborted",
+            "code": 20,
             "errno": null,
             "syscall": null,
             "address": null,
             "port": null,
-            "elapsedMs": 10493,
-            "cause": {
-              "name": "ConnectTimeoutError",
-              "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
-              "code": "UND_ERR_CONNECT_TIMEOUT",
-              "errno": null,
-              "syscall": null,
-              "address": null,
-              "port": null
-            }
+            "elapsedMs": 15000,
+            "applicationTimeout": true
           }
         },
         {
           "attempt": 3,
           "ok": false,
-          "category": "TCP_CONNECT_TIMEOUT",
-          "elapsedMs": 10494,
+          "category": "APPLICATION_TIMEOUT",
+          "elapsedMs": 15002,
           "error": {
-            "name": "TypeError",
-            "message": "fetch failed",
-            "code": null,
+            "name": "AbortError",
+            "message": "This operation was aborted",
+            "code": 20,
             "errno": null,
             "syscall": null,
             "address": null,
             "port": null,
-            "elapsedMs": 10494,
-            "cause": {
-              "name": "ConnectTimeoutError",
-              "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
-              "code": "UND_ERR_CONNECT_TIMEOUT",
-              "errno": null,
-              "syscall": null,
-              "address": null,
-              "port": null
-            }
+            "elapsedMs": 15002,
+            "applicationTimeout": true
           }
         }
       ],
       "finalError": {
-        "name": "TypeError",
-        "message": "fetch failed",
-        "code": null,
+        "name": "AbortError",
+        "message": "This operation was aborted",
+        "code": 20,
         "errno": null,
         "syscall": null,
         "address": null,
         "port": null,
-        "elapsedMs": 10494,
-        "cause": {
-          "name": "ConnectTimeoutError",
-          "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
-          "code": "UND_ERR_CONNECT_TIMEOUT",
-          "errno": null,
-          "syscall": null,
-          "address": null,
-          "port": null
-        }
+        "elapsedMs": 15002,
+        "applicationTimeout": true
       }
     }
   ]
