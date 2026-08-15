@@ -1,5 +1,5 @@
 {
-  "date": "2026-08-14T14:58:08.116Z",
+  "date": "2026-08-15T14:29:11.653Z",
   "total": 87,
   "successCount": 0,
   "failCount": 1,
@@ -32,6 +32,56 @@
           "attempt": 1,
           "ok": false,
           "category": "TCP_CONNECT_TIMEOUT",
+          "elapsedMs": 10495,
+          "error": {
+            "name": "TypeError",
+            "message": "fetch failed",
+            "code": null,
+            "errno": null,
+            "syscall": null,
+            "address": null,
+            "port": null,
+            "elapsedMs": 10495,
+            "cause": {
+              "name": "ConnectTimeoutError",
+              "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
+              "code": "UND_ERR_CONNECT_TIMEOUT",
+              "errno": null,
+              "syscall": null,
+              "address": null,
+              "port": null
+            }
+          }
+        },
+        {
+          "attempt": 2,
+          "ok": false,
+          "category": "TCP_CONNECT_TIMEOUT",
+          "elapsedMs": 10495,
+          "error": {
+            "name": "TypeError",
+            "message": "fetch failed",
+            "code": null,
+            "errno": null,
+            "syscall": null,
+            "address": null,
+            "port": null,
+            "elapsedMs": 10495,
+            "cause": {
+              "name": "ConnectTimeoutError",
+              "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
+              "code": "UND_ERR_CONNECT_TIMEOUT",
+              "errno": null,
+              "syscall": null,
+              "address": null,
+              "port": null
+            }
+          }
+        },
+        {
+          "attempt": 3,
+          "ok": false,
+          "category": "TCP_CONNECT_TIMEOUT",
           "elapsedMs": 10496,
           "error": {
             "name": "TypeError",
@@ -52,56 +102,6 @@
               "port": null
             }
           }
-        },
-        {
-          "attempt": 2,
-          "ok": false,
-          "category": "TCP_CONNECT_TIMEOUT",
-          "elapsedMs": 10494,
-          "error": {
-            "name": "TypeError",
-            "message": "fetch failed",
-            "code": null,
-            "errno": null,
-            "syscall": null,
-            "address": null,
-            "port": null,
-            "elapsedMs": 10494,
-            "cause": {
-              "name": "ConnectTimeoutError",
-              "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
-              "code": "UND_ERR_CONNECT_TIMEOUT",
-              "errno": null,
-              "syscall": null,
-              "address": null,
-              "port": null
-            }
-          }
-        },
-        {
-          "attempt": 3,
-          "ok": false,
-          "category": "TCP_CONNECT_TIMEOUT",
-          "elapsedMs": 10494,
-          "error": {
-            "name": "TypeError",
-            "message": "fetch failed",
-            "code": null,
-            "errno": null,
-            "syscall": null,
-            "address": null,
-            "port": null,
-            "elapsedMs": 10494,
-            "cause": {
-              "name": "ConnectTimeoutError",
-              "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
-              "code": "UND_ERR_CONNECT_TIMEOUT",
-              "errno": null,
-              "syscall": null,
-              "address": null,
-              "port": null
-            }
-          }
         }
       ],
       "finalError": {
@@ -112,7 +112,7 @@
         "syscall": null,
         "address": null,
         "port": null,
-        "elapsedMs": 10494,
+        "elapsedMs": 10496,
         "cause": {
           "name": "ConnectTimeoutError",
           "message": "Connect Timeout Error (attempted address: www.law.go.kr:443, timeout: 10000ms)",
