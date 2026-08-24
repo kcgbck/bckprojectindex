@@ -818,6 +818,9 @@ const LAW_LIST = [
     { no: 85, name: "해상교통안전법",                                             api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=014483&type=JSON" },
     { no: 86, name: "해상교통안전법 시행령",                                      api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=014593&type=JSON" },
     { no: 87, name: "해상교통안전법 시행규칙",                                    api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=014619&type=JSON" },
+    { no: 88,  name: "유선 및 도선 사업법",                                      api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=1015&type=JSON" },
+    { no: 89,  name: "유선 및 도선 사업법 시행령",                                api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=4379&type=JSON" },
+    { no: 90,  name: "유선 및 도선 사업법 시행규칙",                              api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=7831&type=JSON" },
 ];
 
 main().catch((error) => {
