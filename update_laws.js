@@ -821,6 +821,7 @@ const LAW_LIST = [
     { no: 88,  name: "유선 및 도선 사업법",                                      api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=1015&type=JSON" },
     { no: 89,  name: "유선 및 도선 사업법 시행령",                                api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=4379&type=JSON" },
     { no: 90,  name: "유선 및 도선 사업법 시행규칙",                              api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=7831&type=JSON" },
+    { no: 91,  name: "수산관계법령 위반행위에 대한 행정처분의 기준과 절차에 관한 규칙",       api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=7545&type=JSON" },
 ];
 
 main().catch((error) => {
