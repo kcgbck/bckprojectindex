@@ -661,23 +661,23 @@ async function main() {
         failedLaws.forEach(name => console.log(`  - ${name}`));
     }
 
-    const version = new Date().toISOString();
-
-    // 실패 목록을 파일로 저장 (워크플로에서 이슈 생성에 활용)
-    if (failedLaws.length > 0) {
-        fs.writeFileSync('./laws_fetch_failures.json', JSON.stringify({
-            date: new Date().toISOString(),
-            total,
-            successCount,
-            failCount,
-            successRate,
-            abortedEarly,
-            abortReason,
-            dataWrite,
-            summary,
-            failureRecords: failureRecords.slice(0, 10),
-        }, null, 2), 'utf-8');
-    }
+    const diagnostics = {
+        version: 1,
+        startedAt,
+        finishedAt,
+        startedAtKst: toKstString(startedAt),
+        finishedAtKst: toKstString(finishedAt),
+        preflight,
+        total,
+        successCount,
+        failCount,
+        successRate,
+        abortedEarly,
+        abortReason,
+        summary,
+        dataWrite,
+        failureRecords,
+    };
 
     const shouldPersistDiagnostics =
         failedLaws.length > 0 ||
@@ -709,6 +709,8 @@ async function main() {
                 status: apiConnectionProbe.status ?? null,
                 elapsedMs: apiConnectionProbe.elapsedMs,
             },
+            dataWrite,
+            failureRecords: failureRecords.slice(0, 10),
             diagnosticFile: DIAGNOSTIC_FILE,
         });
     } else if (fs.existsSync(FAILURE_FILE)) {

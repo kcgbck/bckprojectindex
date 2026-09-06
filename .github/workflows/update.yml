@@ -72,11 +72,11 @@ jobs:
             exit 0
           fi
 
-          SUCCESS_RATE=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.successRate);")
-          FAIL_LIST=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); d.failedLaws.forEach(n=>console.log('- '+n));")
-          DIAG_CATEGORY=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.diagnosticSummary?.category ?? 'UNKNOWN');")
-          DIAG_EXPLANATION=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.diagnosticSummary?.explanation ?? '진단 설명 없음');")
-          IP_BLOCK_CONCLUSION=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.diagnosticSummary?.ipBlockConclusion ?? '판단 불가');")
+          SUCCESS_RATE=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.successRate ?? 0);")
+          FAIL_LIST=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); const list=d.failedLaws || (d.failureRecords ? d.failureRecords.map(r=>r.name) : []); list.forEach(n=>console.log('- '+n));")
+          DIAG_CATEGORY=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.diagnosticSummary?.category ?? d.summary?.category ?? 'UNKNOWN');")
+          DIAG_EXPLANATION=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.diagnosticSummary?.explanation ?? d.summary?.explanation ?? '진단 설명 없음');")
+          IP_BLOCK_CONCLUSION=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.diagnosticSummary?.ipBlockConclusion ?? d.summary?.ipBlockConclusion ?? '판단 불가');")
           EGRESS_IP=$(node -e "const d=JSON.parse(require('fs').readFileSync('laws_fetch_failures.json')); console.log(d.egressIp ?? '확인 실패');")
           DATE=$(node -e "console.log(new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'}))")
 
