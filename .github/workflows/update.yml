@@ -44,14 +44,14 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      - name: 만들어진 JSON 파일을 GitHub에 저장(Commit)
+      - name: 만들어진 파일들을 GitHub에 저장(Commit)
         if: always()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # 성공률 미달 시 스크립트가 기존 laws_data.json을 보존합니다.
           # 진단 상세 파일은 Actions Artifact로만 보관하며 저장소에는 커밋하지 않습니다.
-          git add laws_data.json laws_fetch_failures.json 2>/dev/null || git add laws_data.json
+          git add laws_data.json laws_txt/ laws_fetch_failures.json 2>/dev/null || git add laws_data.json laws_txt/
           git commit -m "법령 데이터 자동 업데이트" || exit 0
           git push
 
