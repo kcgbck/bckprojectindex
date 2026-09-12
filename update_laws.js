@@ -188,6 +188,29 @@ function explanationForCategory(category, status = null) {
     return map[category] ?? '분류되지 않은 오류입니다.';
 }
 
+function extractLawTitle(data) {
+    if (data?.Law?.기본정보?.법령명_한글) return data.Law.기본정보.법령명_한글;
+    if (data?.법령?.기본정보?.법령명_한글) return data.법령.기본정보.법령명_한글;
+    if (data?.AdmRulService?.행정규칙기본정보?.행정규칙명) return data.AdmRulService.행정규칙기본정보.행정규칙명;
+    if (data?.EngLaw?.기본정보?.법령명_한글) return data.EngLaw.기본정보.법령명_한글;
+    return null;
+}
+
+function normalizeTitle(s) {
+    return (s || '').replace(/[·ㆍ\s]/g, '').trim();
+}
+
+function classifyLawType(title, rawData) {
+    if (rawData?.AdmRulService?.행정규칙기본정보?.행정규칙종류) {
+        return `행정규칙(${rawData.AdmRulService.행정규칙기본정보.행정규칙종류})`;
+    }
+    if (rawData?.AdmRulService) return '행정규칙';
+    if (title.endsWith('시행규칙')) return '시행규칙';
+    if (title.endsWith('시행령')) return '시행령';
+    if (title.endsWith('법') || title.endsWith('법률')) return '법률';
+    return '행정규칙';
+}
+
 function buildApiUrl(rawUrl) {
     const url = new URL(rawUrl);
     url.searchParams.set('OC', LAW_API_KEY || API_KEY);
@@ -578,21 +601,30 @@ async function main() {
         for (const item of chunk) {
             try {
                 const { data } = await fetchJsonWithRetry(item);
-                const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data;
+
+                // 법령명 일치 여부 자동 교차 검증 (오타/오매핑 덮어쓰기 방지)
+                const actualTitle = extractLawTitle(data);
+                if (actualTitle && normalizeTitle(actualTitle) !== normalizeTitle(item.name)) {
+                    throw new Error(`법령명 불일치 오류: 설정명="${item.name}", 실제 응답 법령명="${actualTitle}" (API URL ID 오타 확인 필요)`);
+                }
+
+                const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data.AdmRulService?.행정규칙기본정보 || data;
+                const lawCategory = classifyLawType(item.name, data);
                 
                 // 1. 개별 txt 파일로 저장 (개별 저장 유지)
                 const safeName = item.name.replace(/[\\/:*?"<>|]/g, "");
                 fs.writeFileSync(`${outputDir}/${safeName}.txt`, JSON.stringify(data, null, 2), 'utf-8');
                 
-                // 2. 통합 방식 부활: laws_data.json 저장을 위해 updatedLaws 배열에 추가
+                // 2. 통합 방식: laws_data.json 저장을 위해 updatedLaws 배열에 추가
                 updatedLaws.push({
-                    id: basicInfo?.법령ID || basicInfo?.engLawId || `law_${item.no}`,
+                    id: basicInfo?.법령ID || basicInfo?.행정규칙일련번호 || basicInfo?.engLawId || `law_${item.no}`,
                     title: item.name,
+                    category: lawCategory,
                     raw_data: data,
-                    lastUpdated: basicInfo?.시행일자 || basicInfo?.enfDt || new Date().toISOString().split('T')[0],
+                    lastUpdated: basicInfo?.시행일자 || basicInfo?.발령일자 || basicInfo?.enfDt || new Date().toISOString().split('T')[0],
                 });
                 
-                console.log(`[성공] ${item.name} -> 개별 txt 및 통합 객체 생성`);
+                console.log(`[성공] [${lawCategory}] ${item.name} -> 개별 txt 및 통합 객체 생성`);
                 successCount++;
             } catch (error) {
                 const category = error.category ?? classifyError(error);
@@ -751,7 +783,7 @@ const LAW_LIST = [
     { no: 16, name: "선원법 시행령",                                              api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=003922&type=JSON" },
     { no: 17, name: "수산업법",                                                   api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=001486&type=JSON" },
     { no: 18, name: "수산업법 시행규칙",                                          api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=014396&type=JSON" },
-    { no: 19, name: "수산업법 시행령",                                            api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=012248&type=JSON" },
+    { no: 19, name: "수산업법 시행령",                                            api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=004019&type=JSON" },
     { no: 20, name: "수산자원관리법",                                             api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=010965&type=JSON" },
     { no: 21, name: "수산자원관리법 시행규칙",                                    api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=011207&type=JSON" },
     { no: 22, name: "수산자원관리법 시행령",                                      api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=011189&type=JSON" },
