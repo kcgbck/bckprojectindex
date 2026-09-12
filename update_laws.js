@@ -3,11 +3,6 @@ import dns from 'node:dns/promises';
 import https from 'node:https';
 import os from 'node:os';
 
-// ==========================================
-// [필수 설정] 본인의 법령센터 API OC 값을 입력하세요.
-// ==========================================
-const API_KEY = "yechankong0512"; // <-- 이 부분을 본인의 OC 값으로 변경하세요!
-
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const DATA_FILE = './laws_data.json';
@@ -15,6 +10,10 @@ const FAILURE_FILE = './laws_fetch_failures.json';
 const DIAGNOSTIC_FILE = './laws_fetch_diagnostics.json';
 
 const LAW_API_KEY = String(process.env.LAW_API_KEY ?? '').trim();
+
+if (!LAW_API_KEY) {
+    throw new Error('LAW_API_KEY environment variable is required');
+}
 const MIN_SUCCESS_RATE = 50;
 const FETCH_TIMEOUT_MS = 15000;
 const RETRY_COUNT = 3;
@@ -213,7 +212,7 @@ function classifyLawType(title, rawData) {
 
 function buildApiUrl(rawUrl) {
     const url = new URL(rawUrl);
-    url.searchParams.set('OC', LAW_API_KEY || API_KEY);
+    url.searchParams.set('OC', LAW_API_KEY);
     return url.toString();
 }
 
