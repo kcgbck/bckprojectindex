@@ -609,11 +609,11 @@ async function main() {
 
                 const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data.AdmRulService?.행정규칙기본정보 || data;
                 const lawCategory = classifyLawType(item.name, data);
-                
+
                 // 1. 개별 txt 파일로 저장 (개별 저장 유지)
                 const safeName = item.name.replace(/[\\/:*?"<>|]/g, "");
                 fs.writeFileSync(`${outputDir}/${safeName}.txt`, JSON.stringify(data, null, 2), 'utf-8');
-                
+
                 // 2. 통합 방식: laws_data.json 저장을 위해 updatedLaws 배열에 추가
                 updatedLaws.push({
                     id: basicInfo?.법령ID || basicInfo?.행정규칙일련번호 || basicInfo?.engLawId || `law_${item.no}`,
@@ -622,7 +622,7 @@ async function main() {
                     raw_data: data,
                     lastUpdated: basicInfo?.시행일자 || basicInfo?.발령일자 || basicInfo?.enfDt || new Date().toISOString().split('T')[0],
                 });
-                
+
                 console.log(`[성공] [${lawCategory}] ${item.name} -> 개별 txt 및 통합 객체 생성`);
                 successCount++;
             } catch (error) {
@@ -858,6 +858,13 @@ const LAW_LIST = [
     { no: 92,  name: "해수욕장의 이용 및 관리에 관한 법률",                                api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=12065&type=JSON" },
     { no: 93,  name: "해수욕장의 이용 및 관리에 관한 법률 시행령",                          api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=12180&type=JSON" },
     { no: 94,  name: "해수욕장의 이용 및 관리에 관한 법률 시행규칙",                        api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=12185&type=JSON" },
+    { no: 95,  name: "산업안전보건기준에 관한 규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=007363&type=JSON" },
+    { no: 96,  name: "산업안전보건법", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=001766&type=JSON" },
+    { no: 97,  name: "산업안전보건법 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=003786&type=JSON" },
+    { no: 98,  name: "산업안전보건법 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=007364&type=JSON" },
+    { no: 99,  name: "출입국관리법", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=001707&type=JSON" },
+    { no: 100, name: "출입국관리법 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=005256&type=JSON" },
+    { no: 101, name: "출입국관리법 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=008494&type=JSON" },
 ];
 
 main().catch((error) => {
