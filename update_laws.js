@@ -865,6 +865,8 @@ const LAW_LIST = [
     { no: 99,  name: "출입국관리법", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=001707&type=JSON" },
     { no: 100, name: "출입국관리법 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=005256&type=JSON" },
     { no: 101, name: "출입국관리법 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=008494&type=JSON" },
+    { no: 102, name: "경찰관 직무집행법", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=000985&type=JSON" },
+    { no: 103, name: "경찰관 직무집행법 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=002199&type=JSON" },
 ];
 
 main().catch((error) => {
