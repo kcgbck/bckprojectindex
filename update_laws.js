@@ -192,11 +192,17 @@ function extractLawTitle(data) {
     if (data?.법령?.기본정보?.법령명_한글) return data.법령.기본정보.법령명_한글;
     if (data?.AdmRulService?.행정규칙기본정보?.행정규칙명) return data.AdmRulService.행정규칙기본정보.행정규칙명;
     if (data?.EngLaw?.기본정보?.법령명_한글) return data.EngLaw.기본정보.법령명_한글;
+    if (data?.OrdinService?.자치법규기본정보?.자치법규명) return data.OrdinService.자치법규기본정보.자치법규명;
+    if (data?.OrdinService?.기본정보?.자치법규명) return data.OrdinService.기본정보.자치법규명;
+    if (data?.ordin?.기본정보?.자치법규명) return data.ordin.기본정보.자치법규명;
+    if (data?.ordin?.자치법규기본정보?.자치법규명) return data.ordin.자치법규기본정보.자치법규명;
+    if (data?.자치법규?.기본정보?.자치법규명) return data.자치법규.기본정보.자치법규명;
+    if (data?.자치법규?.자치법규기본정보?.자치법규명) return data.자치법규.자치법규기본정보.자치법규명;
     return null;
 }
 
 function normalizeTitle(s) {
-    return (s || '').replace(/[·ㆍ\s]/g, '').trim();
+    return (s || '').replace(/[\(\)\[\]\{\}\·\ㆍ\s]/g, '').trim();
 }
 
 function classifyLawType(title, rawData) {
@@ -204,10 +210,15 @@ function classifyLawType(title, rawData) {
         return `행정규칙(${rawData.AdmRulService.행정규칙기본정보.행정규칙종류})`;
     }
     if (rawData?.AdmRulService) return '행정규칙';
+    if (rawData?.OrdinService || rawData?.ordin || rawData?.자치법규) {
+        return '자치법규(조례)';
+    }
+    if (title.endsWith('조례') || title.includes('조례')) return '자치법규(조례)';
     if (title.endsWith('시행규칙')) return '시행규칙';
     if (title.endsWith('시행령')) return '시행령';
     if (title.endsWith('법') || title.endsWith('법률')) return '법률';
-    return '행정규칙';
+    if (title.endsWith('고시') || title.endsWith('공고') || title.endsWith('훈령') || title.endsWith('예규')) return '행정규칙';
+    return '기타규정';
 }
 
 function buildApiUrl(rawUrl) {
@@ -607,7 +618,7 @@ async function main() {
                     throw new Error(`법령명 불일치 오류: 설정명="${item.name}", 실제 응답 법령명="${actualTitle}" (API URL ID 오타 확인 필요)`);
                 }
 
-                const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data.AdmRulService?.행정규칙기본정보 || data;
+                const basicInfo = data.Law?.기본정보 || data.EngLaw?.기본정보 || data.AdmRulService?.행정규칙기본정보 || data.OrdinService?.자치법규기본정보 || data.OrdinService?.기본정보 || data.ordin?.기본정보 || data.ordin?.자치법규기본정보 || data.자치법규?.기본정보 || data;
                 const lawCategory = classifyLawType(item.name, data);
 
                 // 1. 개별 txt 파일로 저장 (개별 저장 유지)
@@ -616,11 +627,11 @@ async function main() {
 
                 // 2. 통합 방식: laws_data.json 저장을 위해 updatedLaws 배열에 추가
                 updatedLaws.push({
-                    id: basicInfo?.법령ID || basicInfo?.행정규칙일련번호 || basicInfo?.engLawId || `law_${item.no}`,
+                    id: basicInfo?.법령ID || basicInfo?.행정규칙일련번호 || basicInfo?.자치법규일련번호 || basicInfo?.자치법규ID || basicInfo?.mst || basicInfo?.engLawId || `law_${item.no}`,
                     title: item.name,
                     category: lawCategory,
                     raw_data: data,
-                    lastUpdated: basicInfo?.시행일자 || basicInfo?.발령일자 || basicInfo?.enfDt || new Date().toISOString().split('T')[0],
+                    lastUpdated: basicInfo?.시행일자 || basicInfo?.발령일자 || basicInfo?.공포일자 || basicInfo?.enfDt || new Date().toISOString().split('T')[0],
                 });
 
                 console.log(`[성공] [${lawCategory}] ${item.name} -> 개별 txt 및 통합 객체 생성`);
@@ -867,6 +878,30 @@ const LAW_LIST = [
     { no: 101, name: "출입국관리법 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=008494&type=JSON" },
     { no: 102, name: "경찰관 직무집행법", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=000985&type=JSON" },
     { no: 103, name: "경찰관 직무집행법 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=002199&type=JSON" },
+    { no: 104, name: "해양사고의 조사 및 심판에 관한 법률", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=000047&type=JSON" },
+    { no: 105, name: "해양사고의 조사 및 심판에 관한 법률 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=005551&type=JSON" },
+    { no: 106, name: "해양사고의 조사 및 심판에 관한 법률 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=008663&type=JSON" },
+    { no: 107, name: "연안사고 예방에 관한 법률", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=012049&type=JSON" },
+    { no: 108, name: "연안사고 예방에 관한 법률 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=012134&type=JSON" },
+    { no: 109, name: "연안사고 예방에 관한 법률 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=012137&type=JSON" },
+    { no: 110, name: "동해해양경찰서 테트라포드 출입통제구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000263736&type=JSON" },
+    { no: 111, name: "(보령해양경찰서) 직언도 갯벌 인근 해역 출입통제구역 지정 공고", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000273404&type=JSON" },
+    { no: 112, name: "(인천해양경찰서) 하나개해수욕장 갯벌 일부 출입통제 구역 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000248022&type=JSON" },
+    { no: 113, name: "(강릉해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000260854&type=JSON" },
+    { no: 114, name: "(군산해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000282952&type=JSON" },
+    { no: 115, name: "(동해해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000261840&type=JSON" },
+    { no: 116, name: "(목포해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000262082&type=JSON" },
+    { no: 117, name: "(보령해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000244118&type=JSON" },
+    { no: 118, name: "(부산해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000248176&type=JSON" },
+    { no: 119, name: "(부안해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000237508&type=JSON" },
+    { no: 120, name: "(사천해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000260990&type=JSON" },
+    { no: 121, name: "서귀포해양경찰서 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000231428&type=JSON" },
+    { no: 122, name: "(속초해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000262888&type=JSON" },
+    { no: 123, name: "(여수해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000234070&type=JSON" },
+    { no: 124, name: "(완도해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000246304&type=JSON" },
+    { no: 125, name: "(울산해양경찰서) 수상레저활동금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000219500&type=JSON" },
+    { no: 126, name: "(인천해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000237324&type=JSON" },
+    { no: 127, name: "강원특별자치도 비어업인의 수산자원 포획·채취 관리 기준에 관한 조례", api: "https://www.law.go.kr/DRF/lawService.do?target=ordin&MST=1959885&type=JSON" },
 ];
 
 main().catch((error) => {

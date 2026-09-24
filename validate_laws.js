@@ -43,6 +43,21 @@ function extractLawTitle(data) {
   if (raw.AdmRulService && raw.AdmRulService.행정규칙기본정보 && raw.AdmRulService.행정규칙기본정보.행정규칙명) {
     return raw.AdmRulService.행정규칙기본정보.행정규칙명;
   }
+  if (raw.OrdinService && raw.OrdinService.자치법규기본정보 && raw.OrdinService.자치법규기본정보.자치법규명) {
+    return raw.OrdinService.자치법규기본정보.자치법규명;
+  }
+  if (raw.OrdinService && raw.OrdinService.기본정보 && raw.OrdinService.기본정보.자치법규명) {
+    return raw.OrdinService.기본정보.자치법규명;
+  }
+  if (raw.ordin && raw.ordin.기본정보 && raw.ordin.기본정보.자치법규명) {
+    return raw.ordin.기본정보.자치법규명;
+  }
+  if (raw.ordin && raw.ordin.자치법규기본정보 && raw.ordin.자치법규기본정보.자치법규명) {
+    return raw.ordin.자치법규기본정보.자치법규명;
+  }
+  if (raw['자치법규'] && raw['자치법규'].기본정보 && raw['자치법규'].기본정보.자치법규명) {
+    return raw['자치법규'].기본정보.자치법규명;
+  }
   if (data.title) {
     return data.title;
   }
@@ -51,6 +66,7 @@ function extractLawTitle(data) {
 
 function classifyLawType(name) {
   const norm = name.trim();
+  if (norm.endsWith('조례') || norm.includes('조례')) return '자치법규';
   if (norm.endsWith('시행령') || norm.includes('시행령')) return '시행령';
   if (norm.endsWith('시행규칙') || norm.includes('시행규칙')) return '시행규칙';
   if (norm.endsWith('훈령') || norm.endsWith('예규') || norm.endsWith('고시') || norm.endsWith('공고') || norm.endsWith('지침')) return '행정규칙';
@@ -174,6 +190,6 @@ if (hasError) {
   console.log('\n❌ [검증 실패] 데이터 불일치 또는 누락이 발견되었습니다.');
   process.exit(1);
 } else {
-  console.log('\n✅ [검증 통과] 94개 모든 법령의 설정, JSON 데이터, 개별 TXT 파일이 100% 정상 일치합니다.');
+  console.log(`\n✅ [검증 통과] ${stats.total}개 모든 법령의 설정, JSON 데이터, 개별 TXT 파일이 100% 정상 일치합니다.`);
   process.exit(0);
 }
