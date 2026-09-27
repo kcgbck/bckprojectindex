@@ -902,6 +902,9 @@ const LAW_LIST = [
     { no: 125, name: "(울산해양경찰서) 수상레저활동금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000219500&type=JSON" },
     { no: 126, name: "(인천해양경찰서) 수상레저활동 금지구역 지정 고시", api: "https://www.law.go.kr/DRF/lawService.do?target=admrul&ID=2100000237324&type=JSON" },
     { no: 127, name: "강원특별자치도 비어업인의 수산자원 포획·채취 관리 기준에 관한 조례", api: "https://www.law.go.kr/DRF/lawService.do?target=ordin&MST=1959885&type=JSON" },
+    { no: 128, name: "해양생태계의 보전 및 관리에 관한 법률", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=010298&type=JSON" },
+    { no: 129, name: "해양생태계의 보전 및 관리에 관한 법률 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=010419&type=JSON" },
+    { no: 130, name: "해양생태계의 보전 및 관리에 관한 법률 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=010423&type=JSON" },
 ];
 
 main().catch((error) => {
