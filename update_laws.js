@@ -905,6 +905,9 @@ const LAW_LIST = [
     { no: 128, name: "해양생태계의 보전 및 관리에 관한 법률", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=010298&type=JSON" },
     { no: 129, name: "해양생태계의 보전 및 관리에 관한 법률 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=010419&type=JSON" },
     { no: 130, name: "해양생태계의 보전 및 관리에 관한 법률 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=010423&type=JSON" },
+    { no: 131, name: "선박법", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=000068&type=JSON" },
+    { no: 132, name: "선박법 시행령", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=003904&type=JSON" },
+    { no: 133, name: "선박법 시행규칙", api: "https://www.law.go.kr/DRF/lawService.do?target=eflaw&ID=007449&type=JSON" },
 ];
 
 main().catch((error) => {
