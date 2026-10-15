@@ -647,6 +647,7 @@
       "법령명_한글": "경찰관 직무집행법 시행령",
       "공포번호": "36462",
       "전화번호": "02-3150-1192",
+      "법령명_영어": "ENFORCEMENT DECREE OF THE ACT ON THE PERFORMANCE OF DUTIES BY POLICE OFFICERS",
       "언어": "한글",
       "제개정구분": "일부개정",
       "법령ID": "002199",
