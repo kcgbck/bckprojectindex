@@ -64,6 +64,36 @@ jobs:
           git commit -m "법령 데이터 자동 업데이트"
           git push
 
+      - name: NotebookLM용 통합 법령집 생성
+        if: always()
+        run: node build_consolidated_txt.js
+
+      - name: Google Drive로 법령 txt 및 통합본 동기화 (rclone)
+        if: always()
+        env:
+          RCLONE_CONFIG_DATA: ${{ secrets.RCLONE_CONFIG }}
+          GDRIVE_DIR: ${{ secrets.GDRIVE_DIR || 'lawproject_txt' }}
+        run: |
+          if [ -z "$RCLONE_CONFIG_DATA" ]; then
+            echo "ℹ️ RCLONE_CONFIG 시크릿이 설정되지 않아 Google Drive 동기화를 건너뜁니다."
+            echo "ℹ️ GitHub 저장소 Settings > Secrets and variables > Actions 에 RCLONE_CONFIG를 등록하면 자동 동기화가 활성화됩니다."
+            exit 0
+          fi
+          echo "📦 rclone 설치 중..."
+          sudo apt-get update -qq && sudo apt-get install -y -qq rclone
+
+          mkdir -p ~/.config/rclone
+          echo "$RCLONE_CONFIG_DATA" > ~/.config/rclone/rclone.conf
+
+          echo "🚀 Google Drive로 laws_txt (개별 파일) 동기화..."
+          rclone sync laws_txt/ "gdrive:${GDRIVE_DIR}/laws_txt" --fast-list --transfers 4 --checkers 8 -v
+
+          if [ -d "laws_consolidated" ]; then
+            echo "🚀 Google Drive로 laws_consolidated (NotebookLM 통합본) 동기화..."
+            rclone sync laws_consolidated/ "gdrive:${GDRIVE_DIR}/laws_consolidated" --fast-list -v
+          fi
+          echo "✅ Google Drive 동기화 완료!"
+
       # 실패 파일이 존재하고 failCount가 1개 이상일 때만 이슈 생성
       - name: 법령 fetch 실패 시 GitHub 이슈 생성
         if: always()

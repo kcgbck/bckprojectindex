@@ -1,25 +1,28 @@
 # CURRENT.md
 
 ## Current Goal
-- 해양경찰 소관 34개 법령 추가 등록 및 전체 167개 관리 체계 확립
+- rclone 기반 Google Drive 자동 동기화 및 NotebookLM용 통합 법령집 구축 (A방식)
 
 ## Completed
-- `C:\Users\YECHAN\workspace\서브\API-법령.xls` 전수 분석을 통해 소관부처 해양경찰(단독 및 공동 소관 56개) 중 기존 등록분(22개) 제외한 34개 신규 법령 식별 완료
-- `update_laws.js` 내 신규 34종(no. 134~167) 추가 등록 완료 (총 167개)
-- 국가법령정보센터 공식 법령ID 대조 및 중복 전수 검증 완료
-- 코딩파트너 프로젝트 가이드(167개 법령) 및 상태 문서 최신화
+- `build_consolidated_txt.js` 개발: 167개 법령 txt를 5대 카테고리(법률, 시행령, 시행규칙, 행정규칙, 기타규정)로 자동 묶음 생성 (NotebookLM 50개 소스 제한 완벽 대응)
+- `.github/workflows/update.yml` 워크플로우 갱신: GitHub Actions에서 법령 갱신 후 rclone을 통한 Google Drive 자동 증분 동기화 스텝 추가 (`RCLONE_CONFIG` 시크릿 연동)
+- `.gitignore`: `laws_consolidated/` 추가 (불필요한 대용량 텍스트 Git 저장 방지)
+- GitHub Secrets (`RCLONE_CONFIG`) 등록 및 로컬 구글 드라이브 연결 검증 완료
 
 ## Verification
-- `node -c update_laws.js`: 문법 검사 통과
-- `node -c validate_laws.js`: 문법 검사 통과
-- `node validate_laws.js`: 167개 대상 정확히 인식 (법률 41, 시행령 38, 시행규칙 37, 행정규칙 20, 자치법규 1, 기타규정 30)
-  * 기존 133건 100% 정상 일치 확인 (선박법 3건 수집 완료 반영), 신규 34건(해양경찰 소관 34건) 수집 대기 정상 식별
+- `node -c build_consolidated_txt.js`: 문법 검사 통과
+- `node build_consolidated_txt.js`: 167개 전체 법령 정상 번들링 검증 완료 (총 5개 통합본 약 43.3 MB)
+  * `01_법률_통합본.txt` (6.73 MB)
+  * `02_시행령_통합본.txt` (7.90 MB)
+  * `03_시행규칙_통합본.txt` (23.87 MB)
+  * `04_행정규칙_고시_훈령_통합본.txt` (0.17 MB)
+  * `05_기타규정_자치법규_통합본.txt` (4.61 MB)
+- `node validate_laws.js`: 총 167개 법령 100% 일치 통과 (누락: 0, 불일치: 0)
 
 ## Remaining Work
-- GitHub Actions 실행 후 신규 법령 실데이터 수집 완료 확인
-- 수집 완료 후 167개 전수 무결성 검증
+- GitHub Actions 실행 및 Google Drive 자동 동기화 확인
+- NotebookLM에 Google Drive 통합본 소스 등록 확인
 
 ## Cautions
-- `LAW_LIST` 항목 추가/수정 시 `validate_laws.js` 실행 필수
-- 고시(`admrul`) 및 조례(`ordin`) API 호출 양식 차이 준수
-- UTF-8 인코딩 보존
+- `RCLONE_CONFIG` 미등록 시에도 GitHub Actions 빌드는 에러 없이 정상 종료되도록 안전 처리 완료
+- UTF-8 인코딩 및 도메인 명칭 보존
