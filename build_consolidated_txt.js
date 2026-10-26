@@ -4,6 +4,9 @@ const path = require('path');
 const lawsTxtDir = path.join(__dirname, 'laws_txt');
 const outDir = path.join(__dirname, 'laws_consolidated');
 
+// 최대 크기 6.4 MB (6.5 MB 미만 보장)
+const MAX_PART_SIZE_BYTES = 6.4 * 1024 * 1024;
+
 if (!fs.existsSync(lawsTxtDir)) {
   console.error('[FAIL] laws_txt 디렉터리가 존재하지 않습니다.');
   process.exit(1);
@@ -11,6 +14,13 @@ if (!fs.existsSync(lawsTxtDir)) {
 
 if (!fs.existsSync(outDir)) {
   fs.mkdirSync(outDir, { recursive: true });
+} else {
+  // 기존 파일 정리
+  for (const f of fs.readdirSync(outDir)) {
+    if (f.endsWith('.txt')) {
+      fs.unlinkSync(path.join(outDir, f));
+    }
+  }
 }
 
 // update_laws.js에서 LAW_LIST 로드
@@ -107,14 +117,44 @@ for (const file of allTxtFiles) {
   bundles[bundleFileName].push(section);
 }
 
-console.log('=== [통합 법령집 생성 시작 (NotebookLM 소스용)] ===');
-let totalBundledFiles = 0;
-for (const [fileName, sections] of Object.entries(bundles)) {
-  const outPath = path.join(outDir, fileName);
-  const combined = sections.join('\n');
-  fs.writeFileSync(outPath, combined, 'utf8');
-  const sizeMb = (Buffer.byteLength(combined, 'utf8') / (1024 * 1024)).toFixed(2);
-  console.log(`- ${fileName}: ${sections.length}개 법령 포함 (${sizeMb} MB)`);
-  totalBundledFiles += sections.length;
+console.log('=== [통합 법령집 생성 시작 (NotebookLM 소스용, 파일당 최대 6.5 MB 분할)] ===');
+let totalBundledLaws = 0;
+let totalCreatedFiles = 0;
+
+for (const [baseFileName, sections] of Object.entries(bundles)) {
+  const parts = [];
+  let currentPart = [];
+  let currentBytes = 0;
+
+  for (const sec of sections) {
+    const secBytes = Buffer.byteLength(sec, 'utf8') + 1;
+    if (currentPart.length > 0 && currentBytes + secBytes > MAX_PART_SIZE_BYTES) {
+      parts.push(currentPart);
+      currentPart = [sec];
+      currentBytes = secBytes;
+    } else {
+      currentPart.push(sec);
+      currentBytes += secBytes;
+    }
+  }
+  if (currentPart.length > 0) {
+    parts.push(currentPart);
+  }
+
+  for (let i = 0; i < parts.length; i++) {
+    const fileName = parts.length > 1
+      ? baseFileName.replace('.txt', `_${String(i + 1).padStart(2, '0')}.txt`)
+      : baseFileName;
+
+    const outPath = path.join(outDir, fileName);
+    const combined = parts[i].join('\n');
+    fs.writeFileSync(outPath, combined, 'utf8');
+
+    const sizeMb = (Buffer.byteLength(combined, 'utf8') / (1024 * 1024)).toFixed(2);
+    console.log(`- ${fileName}: ${parts[i].length}개 법령 포함 (${sizeMb} MB)`);
+    totalBundledLaws += parts[i].length;
+    totalCreatedFiles++;
+  }
 }
-console.log(`\n[완료] 총 ${totalBundledFiles}개 법령을 5개 통합 파일로 생성 완료 (${outDir})`);
+
+console.log(`\n[완료] 총 ${totalBundledLaws}개 법령을 ${totalCreatedFiles}개 분할 통합 파일로 생성 완료 (모든 파일 6.5 MB 이하 보장)`);
