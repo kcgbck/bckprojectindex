@@ -187,6 +187,7 @@
       "별표시행일자문자열": "20260423:별표1",
       "공포번호": "36274",
       "전화번호": "051-773-6186, 6265",
+      "법령명_영어": "ENFORCEMENT DECREE OF THE ACT ON THE SAFETY AND PROMOTION OF UNDERWATER LEISURE ACTIVITIES",
       "언어": "한글",
       "제개정구분": "일부개정",
       "법령ID": "012870",
