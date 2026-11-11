@@ -21,7 +21,7 @@
           "별지 제16호서식 제2쪽의 처리절차란 중 \"자연유산위원회\"를 \"국가유산위원회\"로 한다.",
           "          부칙",
           "이 규칙은 공포한 날부터 시행한다.",
-          "<img src=\"http://www.law.go.kr/flDownload.do?flSeq=171270853\"  alt=\"img171270853\" >",
+          "<img src=\"http://www.law.go.kr/flDownload.do?flSeq=171380033\"  alt=\"img171380033\" >",
           "</img>"
         ]
       ]
